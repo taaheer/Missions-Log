@@ -1,7 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls.Basic
+import QtQuick.Controls.Universal
+import QtCore
 
+import MissionsLog
+
+import QWindowKit
 
 ApplicationWindow {
     id: window
@@ -10,80 +14,139 @@ ApplicationWindow {
     minimumWidth: 200
     minimumHeight: 250
     visible: true
-    title: qsTr("Hello World")
-    property bool lightMode: Application.styleHints.colorScheme === Qt.Light
-    property color reallyDark: "#1f1f1f"
-    property color dark: "#262626"
-    property color reallyLight: "#e7e7e7"
-    property color light: "#e0e0e0"
+    title: qsTr("Missions Log")
 
-    GridLayout {
-        id: grid
-        columns: width < 400 ? 1 : 2
-        rowSpacing: 0
-        columnSpacing: 0
+    Settings{
+        id: userSettings
+
+        property alias windowWidth: window.width
+        property alias windowHeight: window.height
+
+    }
+
+    color: "transparent"
+
+    background: Rectangle{
+        color: Qt.alpha(Theme.primaryColor, 0.1)
+    }
+
+    WindowAgent{
+        id: windowAgent
+    }
+
+    Component.onCompleted: {
+        windowAgent.setup(window)
+        windowAgent.setTitleBar(titleBar)
+
+        windowAgent.setSystemButton(WindowAgent.Minimize, minButton)
+        windowAgent.setSystemButton(WindowAgent.Maximize, maxButton)
+        windowAgent.setSystemButton(WindowAgent.Close, closeButton)
+
+        windowAgent.setHitTestVisible(minButton, true)
+        windowAgent.setHitTestVisible(maxButton, true)
+        windowAgent.setHitTestVisible(closeButton, true)
+
+        if(Qt.platform.os === "windows"){
+            windowAgent.setWindowAttribute("dwm-blur", false)
+            windowAgent.setWindowAttribute("acrylic-material", false)
+            windowAgent.setWindowAttribute("mica", false)
+        } else if (Qt.platform.os === "osx") {
+            windowAgent.setWindowAttribute("blur-effect", "none")
+        }
+    }
+
+    ColumnLayout{
         anchors.fill: parent
+        spacing: 0
 
         Rectangle {
-            id: rectangle1
-            color: window.lightMode ? window.reallyLight : window.reallyDark
-            Layout.fillHeight: true
+            id: titleBar
             Layout.fillWidth: true
+            height: 36
+            color: "transparent"
 
-            ColumnLayout {
+
+            RowLayout{
                 anchors.fill: parent
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                spacing: 2
 
-                Label {
-                    id: text1
-                    color: window.lightMode ? window.dark : window.light
-                    font.pixelSize: 120
-                    fontSizeMode: Text.Fit
-                    text: qsTr("Hello World")
-                    Layout.fillWidth: true
+                Icon{
+                    iconScale: 0.6
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.leftMargin: 6
+                }
+
+                AnimatedBullets{
+                    spacing: -13
+                    Layout.topMargin: -8
+                }
+
+                ColumnLayout{
+                    spacing: -6
+                    DecoderText {
+                        id: titleText
+                        color: Theme.primaryTextColor
+                        font{
+                            pointSize: 16
+                            capitalization: Font.AllUppercase
+                        }
+                        Layout.fillWidth: true
+
+                        finalText: window.title
+                    }
+
+                    RepeatingCharacter{
+                        finalText: "◥".repeat(16)
+                        color: Theme.primaryColor
+                        font.pointSize: 5
+                    }
+                }
+
+                RowLayout{
                     Layout.fillHeight: true
-                    Layout.margins: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+
+                    WindowBarButton{
+                        id: minButton
+                        Layout.preferredWidth: 45
+                        Layout.fillHeight: true
+                        text: "⎊"
+                        font.pointSize: 20
+
+                        onClicked: window.showMinimized()
+                    }
+
+                    WindowBarButton{
+                        id: maxButton
+                        Layout.preferredWidth: 45
+                        Layout.fillHeight: true
+                        text: window.visibility === Window.Maximized ? "⏣" : "⬡"
+                        font.pointSize: 20
+
+
+                        onClicked: {
+                            if (window.visibility === Window.Maximized) {
+                                window.showNormal()
+                            } else {
+                                window.showMaximized()
+                            }
+                        }
+                    }
+
+                    WindowBarButton{
+                        id: closeButton
+                        Layout.preferredWidth: 45
+                        Layout.fillHeight: true
+                        text: "⌬"
+                        font.pointSize: 20
+                        onClicked: window.close()
+                    }
                 }
             }
         }
 
-        Rectangle {
-            id: rectangle2
-            color: window.lightMode ? window.light : window.dark
-            Layout.fillHeight: true
+        Item{
             Layout.fillWidth: true
-
-            ColumnLayout {
-                anchors.fill: parent
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-
-                Button {
-                    id: button1
-                    text: window.lightMode ? qsTr("\u263D  Dark mode")
-                                           : qsTr("\u263C  Light mode")
-                    Layout.bottomMargin: 16
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-
-                    contentItem: Text {
-                        text: button1.text
-                        color: window.lightMode ? window.light : window.dark
-                        font: button1.font
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    background: Rectangle {
-                        implicitWidth: 120
-                        implicitHeight: 36
-                        radius: 8
-                        color: window.lightMode ? window.dark : window.light
-                    }
-
-                    onClicked: window.lightMode = !window.lightMode
-                }
-            }
+            Layout.fillHeight: true
         }
     }
 

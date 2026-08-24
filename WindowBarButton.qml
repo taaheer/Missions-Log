@@ -37,6 +37,6 @@ T.Button {
         implicitHeight: 32
 
         visible: !control.flat || control.down || control.checked || control.highlighted
-        color: control.down ? Theme.primaryColor : (control.hovered ? Qt.alpha(Theme.secondaryColor, 0.5): "transparent")
+        color: control.down ? Theme.primaryColor : (control.hovered ? Qt.alpha(Theme.secondaryColor, 0.5): Theme.transparent)
     }
 }

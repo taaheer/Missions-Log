@@ -63,7 +63,7 @@ ApplicationWindow {
             id: titleBar
             Layout.fillWidth: true
             height: 36
-            color: "transparent"
+            color: Theme.transparent
 
 
             RowLayout{
@@ -147,7 +147,106 @@ ApplicationWindow {
         Item{
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            RowLayout{
+                id: main
+                anchors{
+                    fill: parent
+                    topMargin: 11
+                    bottomMargin: 49
+                    rightMargin: 108
+                    leftMargin: 103
+                }
+
+                spacing: 7
+
+                LeftLayout{
+                    id: leftLayout
+                    mirrored: true
+                    Layout.preferredWidth: main.width / 2 - 43
+                    Layout.fillHeight: true
+                    fillColor: Theme.transparent
+                    strokeColor: Theme.primaryAccent
+
+                    opacity: 0
+
+                    transform: Rotation{
+                        id: leftRotation
+                        axis.x: 0
+                        axis.y: 1
+                        axis.z: 0
+
+                        origin.x: leftLayout.width
+                        origin.y: leftLayout.height / 2
+
+                        angle: -90
+                    }
+
+                    ParallelAnimation{
+                        running: true
+                        NumberAnimation{
+                            target: leftLayout
+                            property: "opacity"
+                            from: 0.0
+                            to: 1.0
+                            duration: 700
+                            easing.type: Easing.OutQuad
+                        }
+
+                        NumberAnimation{
+                            target: leftRotation
+                            property: "angle"
+                            from: -90
+                            to: 0
+                            duration: 700
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                RightLayout{
+                    id: rightLayout
+                    fillColor: Theme.transparent
+                    strokeColor: Theme.primaryColor
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    opacity: 0
+
+                    transform: Rotation{
+                        id: rightRotation
+                        axis.x: 0
+                        axis.y: 1
+                        axis.z: 0
+
+                        origin.x: 0
+                        origin.y: rightLayout.height / 2
+
+                        angle: -90
+                    }
+
+                    ParallelAnimation{
+                        running: true
+                        NumberAnimation{
+                            target: rightLayout
+                            property: "opacity"
+                            from: 0.0
+                            to: 1.0
+                            duration: 700
+                            easing.type: Easing.OutQuad
+                        }
+
+                        NumberAnimation{
+                            target: rightRotation
+                            property: "angle"
+                            from: -90
+                            to: 0
+                            duration: 700
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+            }
         }
     }
-
 }

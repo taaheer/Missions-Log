@@ -38,6 +38,9 @@ qt_add_qml_module(appMissionsLog
         QML_FILES RepeatingCharacter.qml
         QML_FILES AnimatedBullets.qml
         QML_FILES WindowBarButton.qml
+        QML_FILES HexagonPanel.qml
+        QML_FILES LeftLayout.qml
+        QML_FILES RightLayout.qml
 )
 
 

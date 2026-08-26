@@ -7,9 +7,8 @@ HexagonPanel{
         strokeColor: Theme.transparent
         anchors{
             fill: parent
-            margins: 8
+            margins: 6
         }
-
-
+        cutLength: 25
     }
 }

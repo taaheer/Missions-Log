@@ -4,12 +4,14 @@ import QtQuick.Shapes
 Item {
     id: root
 
-    property color fillColor: Qt.alpha(Theme.secondaryColor, 0.9)
+    property color fillColor: Qt.alpha(Theme.secondaryColor, 0.8)
     property color strokeColor: Theme.primaryColor
     property int strokeWidth: strokeColor === Theme.transparent ? 0 : 3
     property bool mirrored: false
 
-    readonly property real cutSize: Math.min(30, width / 2, height / 2)
+    property int cutLength: 30
+
+    readonly property real cutSize: Math.min(cutLength, width / 2, height / 2)
 
     Shape{
         anchors.fill: parent

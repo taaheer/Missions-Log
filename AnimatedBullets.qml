@@ -4,56 +4,41 @@ import QtQuick.Layouts
 ColumnLayout{
     id: control
 
-    SequentialAnimation{
-        running: true
-        loops: 1
+    property int pointSize: 12
+    property color color: Theme.primaryColor
+    property bool setDarkEven: true
 
-        NumberAnimation{
-            target: bullet1
-            property: "opacity"
-            from: 0
-            to: 1
-            duration: 400
-        }
-        NumberAnimation{
-            target: bullet2
-            property: "opacity"
-            from: 0
-            to: 1
-            duration: 400
-        }
-        NumberAnimation{
-            target: bullet3
-            property: "opacity"
-            from: 0
-            to: 1
-            duration: 400
-        }
+    Repeater{
+        model: 3
 
-        PauseAnimation {
-            duration: 800
-        }
-    }
+        Text{
+            id: bullet
 
-    Text{
-        id: bullet1
-        text: "•"
-        color: Theme.primaryColor
-        font.pointSize: 12
-        opacity: 0
-    }
-    Text{
-        id: bullet2
-        text: "•"
-        color: Qt.darker(Theme.primaryColor, 2)
-        font.pointSize: 12
-        opacity: 0
-    }
-    Text{
-        id: bullet3
-        text: "•"
-        color: Theme.primaryColor
-        font.pointSize: 12
-        opacity: 0
+            readonly property bool darkEven: control.setDarkEven && index % 2 === 1
+
+            text: "•"
+            color: darkEven ? Qt.darker(control.color, 2) : control.color
+            font.pointSize: control.pointSize
+            opacity: 0
+
+            SequentialAnimation{
+                running: true
+                loops: 1
+
+
+                PauseAnimation {
+                    duration: index * 300
+                }
+
+                NumberAnimation{
+                    target: bullet
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: 400
+                    easing.type: Easing.OutQuad
+                }
+            }
+        }
     }
 }

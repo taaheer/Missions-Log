@@ -5,16 +5,23 @@ Text{
     property string finalText
     property string displayText: ""
     property int index: 0
+    property int interval: 125
 
     font.pointSize: 5
     color: Theme.primaryColor
     text: displayText
 
+    onFinalTextChanged: {
+        control.index = 0
+        control.displayText = ""
+        revealTimer.restart()
+    }
+
     Timer{
         id: revealTimer
-        interval: 125
+        interval: control.interval
         repeat: true
-        running: true
+        running: control.finalText.length > 0
 
         onTriggered: {
             if(control.index <= control.finalText.length){

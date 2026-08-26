@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Universal
-import QtCore
+// import QtCore
 
 import MissionsLog
 
@@ -9,20 +9,20 @@ import QWindowKit
 
 ApplicationWindow {
     id: window
-    width: 640
-    height: 480
+    width: 1320
+    height: 579
     minimumWidth: 200
     minimumHeight: 250
     visible: true
     title: qsTr("Missions Log")
 
-    Settings{
-        id: userSettings
+    // Settings{
+    //     id: userSettings
 
-        property alias windowWidth: window.width
-        property alias windowHeight: window.height
+    //     property alias windowWidth: window.width
+    //     property alias windowHeight: window.height
 
-    }
+    // }
 
     color: "transparent"
 
@@ -35,6 +35,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+
         windowAgent.setup(window)
         windowAgent.setTitleBar(titleBar)
 
@@ -105,11 +106,12 @@ ApplicationWindow {
                 RowLayout{
                     Layout.fillHeight: true
 
+
                     WindowBarButton{
                         id: minButton
                         Layout.preferredWidth: 45
                         Layout.fillHeight: true
-                        text: "⎊"
+                        text: "❖"
                         font.pointSize: 20
 
                         onClicked: window.showMinimized()
@@ -153,17 +155,17 @@ ApplicationWindow {
                 anchors{
                     fill: parent
                     topMargin: 11
-                    bottomMargin: 49
-                    rightMargin: 108
+                    bottomMargin: 63
+                    rightMargin: 106
                     leftMargin: 103
                 }
 
-                spacing: 7
+                spacing: 10
 
                 LeftLayout{
                     id: leftLayout
                     mirrored: true
-                    Layout.preferredWidth: main.width / 2 - 43
+                    Layout.preferredWidth: main.width / 2 - 52
                     Layout.fillHeight: true
                     fillColor: Theme.transparent
                     strokeColor: Theme.primaryAccent
@@ -245,6 +247,40 @@ ApplicationWindow {
                             easing.type: Easing.OutCubic
                         }
                     }
+                }
+            }
+
+            RowLayout{
+                anchors{
+                    top: main.bottom
+                    left: main.left
+                    right: main.right
+                    leftMargin: 80
+                    topMargin: 10
+                }
+
+                spacing: 20
+
+                CustomButton{
+                    text: "Current"
+                    strokeColor: MissionManager.viewStatus === "current" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+                    onClicked: {
+                        MissionManager.viewStatus = "current"
+                    }
+                }
+
+                CustomButton{
+                    text: "Finished Quests"
+                    strokeColor: MissionManager.viewStatus === "finished" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+                    onClicked: {
+                        MissionManager.viewStatus = "finished"
+                    }
+                }
+
+
+                CustomButton{
+                    text: "New Mission"
+                    strokeColor: hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
                 }
             }
         }

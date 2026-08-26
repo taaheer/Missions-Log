@@ -9,6 +9,7 @@ QtObject {
 
     readonly property color primaryAccent: "#202020"
 
+    readonly property color altPrimaryColor: "#1bf3b7"
 
 
 

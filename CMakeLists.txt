@@ -41,6 +41,11 @@ qt_add_qml_module(appMissionsLog
         QML_FILES HexagonPanel.qml
         QML_FILES LeftLayout.qml
         QML_FILES RightLayout.qml
+        SOURCES
+        SOURCES missionmanager.h missionmanager.cpp
+        RESOURCES missions.json
+        QML_FILES CustomScrollBar.qml
+        QML_FILES CustomButton.qml
 )
 
 

@@ -1,42 +1,41 @@
 import QtQuick
-import QtQuick.Templates as T
-import QtQuick.Controls.impl
-import QtQuick.Controls.Universal
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Effects
 
-T.Button {
+Button {
     id: control
 
-    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
-                            implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
-                             implicitContentHeight + topPadding + bottomPadding)
+    background: Item{}
 
-    padding: 8
-    verticalPadding: padding - 4
-    spacing: 8
-
-    icon.width: 20
-    icon.height: 20
-
-    property bool useSystemFocusVisuals: true
-
-    contentItem: IconLabel {
-        spacing: control.spacing
-        mirrored: control.mirrored
-        display: control.display
-
-        icon: control.icon
-        defaultIconColor: Color.transparent(control.Universal.foreground, enabled ? 1.0 : 0.2)
+    contentItem: Text {
         text: control.text
         font: control.font
-        color: control.down ? Theme.secondaryColor : Theme.primaryColor
-    }
+        color: control.down ? Theme.primaryTextColor :  Theme.primaryColor
 
-    background: Rectangle {
-        implicitWidth: 32
-        implicitHeight: 32
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
 
-        visible: !control.flat || control.down || control.checked || control.highlighted
-        color: control.down ? Theme.primaryColor : (control.hovered ? Qt.alpha(Theme.secondaryColor, 0.5): Theme.transparent)
+        scale: control.down ? 0.90 : 1.0
+
+        Behavior on scale{
+            NumberAnimation{
+                duration: 80
+            }
+        }
+
+        layer.enabled: true
+
+        layer.effect: MultiEffect{
+            shadowEnabled: true
+            shadowColor: Theme.primaryColor
+            shadowBlur: control.down ? 1.0 : (control.hovered ? 0.5 : 0.0)
+            Behavior on shadowBlur {
+                NumberAnimation{
+                    duration: 150
+                    easing: Easing.OutCubic
+                }
+            }
+        }
     }
 }

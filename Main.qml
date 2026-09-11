@@ -209,9 +209,9 @@ ApplicationWindow {
                 RightLayout{
                     id: rightLayout
                     fillColor: Theme.transparent
-                    strokeColor: Theme.primaryColor
                     Layout.fillHeight: true
                     Layout.fillWidth: true
+                    cutLength: 26
 
                     opacity: 0
 

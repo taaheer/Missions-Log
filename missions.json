@@ -5,20 +5,18 @@
                 "category": "main",
                 "id": "m1",
                 "isActive": false,
-                "isCompleted": true,
+                "isCompleted": false,
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
-                        "detail": "The Typhoon is in the Factoring Labs, a secure area underneath this building.",
-                        "isCompleted": true,
-                        "name": "RETRIEVE THE TYPHOON"
+                        "detail": "Radicals have invaded the Sarif plant. If I'm going to keep our newest military prototype a secret, I've got to find a way inside.",
+                        "isCompleted": false,
+                        "name": "ENTER THE MANUFACTURING PLANT"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
-                        "detail": "Radicals have invaded the Sarif facility. Find a way inside.",
+                        "detail": "The Typhoon is in the Factoring Labs, a secure area underneath this building. An elevator located beyond the Assembly Labs will take me there, but only if I can reach it.",
                         "isCompleted": true,
-                        "name": "ENTER THE MANUFACTURING PLANT"
+                        "name": "RETRIEVE THE TYPHOON"
                     }
                 ],
                 "title": "M1 - SECURING SARIFS MANUFACTURING PLANT"
@@ -31,13 +29,11 @@
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "The DRONE is in the Factoring Labs, a secure area underneath this building.",
                         "isCompleted": true,
                         "name": "locatee THE DRONE"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "Radicals have invaded the Sarif facility. Find a way inside.",
                         "isCompleted": true,
                         "name": "ENTER THE MANUFACTURING PLANT"
@@ -45,7 +41,6 @@
                 ],
                 "secondary": [
                     {
-                        "category": "secondary OBJECTIVES",
                         "detail": "The DRONE blueprint is in the Factoring Labs computer, a secure area underneath this building.",
                         "isCompleted": true,
                         "name": "RETRIEVE THE blueprint"
@@ -61,7 +56,6 @@
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "s",
                         "isCompleted": true,
                         "name": "TSEE"
@@ -77,31 +71,26 @@
                 "isSuccess": false,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "SAVE THE MISSION"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "ADD A WAY TO COMPLETE IT"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "ADD A WAY TO MODIFY IT"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": true,
                         "name": "REWRITE IT"
                     },
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "AND MAKE MISSION APPEAL ONE BY ONE"
@@ -109,13 +98,11 @@
                 ],
                 "secondary": [
                     {
-                        "category": "SECONDARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "ADD ANIMATIN"
                     },
                     {
-                        "category": "SECONDARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": false,
                         "name": "SET PROPER COLOR"
@@ -131,7 +118,6 @@
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": true,
                         "name": "SS"
@@ -139,7 +125,6 @@
                 ],
                 "secondary": [
                     {
-                        "category": "SECONDARY OBJECTIVES",
                         "detail": "",
                         "isCompleted": true,
                         "name": "EFSD"
@@ -155,7 +140,6 @@
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "fda",
                         "isCompleted": true,
                         "name": "TS"
@@ -171,7 +155,6 @@
                 "isSuccess": false,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "df",
                         "isCompleted": false,
                         "name": "FD"
@@ -189,7 +172,6 @@
                 "isSuccess": true,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "Find the lost delivery crate dropped near the alleyways.",
                         "isCompleted": true,
                         "name": "LOCATE THE CRATE"
@@ -205,7 +187,6 @@
                 "isSuccess": false,
                 "primary": [
                     {
-                        "category": "PRIMARY OBJECTIVES",
                         "detail": "sggsg",
                         "isCompleted": false,
                         "name": "REEEES"

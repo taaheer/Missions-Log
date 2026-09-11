@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <QDebug>
+
 static QString getWritablePath()
 {
     QString path{QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
@@ -49,7 +51,7 @@ int MissionManager::rowCount(const QModelIndex &parent) const
 
 QVariant MissionManager::data(const QModelIndex &index, int role) const
 {
-    if(!index.isValid() || index.row() < 0 || index.row() >= missions_.size())
+    if(!index.isValid() || !isValidIndex(index.row()))
     {
         return QVariant();
     }
@@ -160,7 +162,7 @@ void MissionManager::loadMissions(const QString &path)
 
 void MissionManager::toggleMissionActive(int index)
 {
-    if(index < 0 || index >= missions_.size())
+    if(!isValidIndex(index))
     {
         return;
     }
@@ -190,7 +192,7 @@ void MissionManager::toggleMissionActive(int index)
 
 void MissionManager::setCurrentIndex(int index)
 {
-    if(currentIndex_ == index || index < 0 || index >= missions_.size())
+    if(currentIndex_ == index || index < 0 || !isValidIndex(index))
     {
         return;
     }
@@ -198,8 +200,6 @@ void MissionManager::setCurrentIndex(int index)
     currentIndex_ = index;
     emit currentIndexChanged();
 }
-
-
 
 void MissionManager::updateFilteredMissions()
 {
@@ -268,6 +268,24 @@ void MissionManager::saveMissions()
     }
 }
 
+bool MissionManager::areAllTasksCompleted(const QVariantMap &mission) const
+{
+    auto checkList = [](const QVariantList &list)
+    {
+        for(const auto &item : list)
+        {
+            if(!item.toMap().value("isCompleted").toBool())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    return checkList(mission["primary"].toList()) && checkList(mission["secondary"].toList());
+}
+
 void MissionManager::setViewStatus(const QString &status)
 {
     if(viewStatus_ == status)
@@ -284,6 +302,174 @@ void MissionManager::setViewStatus(const QString &status)
     endResetModel();
 
     emit viewStatusChanged();
+    emit currentIndexChanged();
+}
+
+QVariantMap MissionManager::currentMission() const
+{
+    if(!isValidIndex(currentIndex_))
+    {
+        return QVariantMap();
+    }
+    return missions_[currentIndex_];
+}
+
+QVariantList MissionManager::currentTasks() const
+{
+    if(!isValidIndex(currentIndex_))
+    {
+        return QVariantList();
+    }
+
+    const QVariantMap mission{currentMission()};
+
+    QVariantList combinedTasks;
+
+    auto processObjectiveList = [](const QVariantList &tasks, const QString &sectionName, int indexOffset)
+    {
+        QVariantList unlocked;
+        bool isBlocked{false};
+
+        for(int i{0}; i < tasks.size(); ++i)
+        {
+            QVariantMap temp{tasks[i].toMap()};
+            temp["section"] = sectionName;
+            temp["originalIndex"] = indexOffset + i;
+
+            bool isDone{temp["isCompleted"].toBool()};
+            if(isBlocked)
+            {
+                break;
+            }
+
+            unlocked.append(temp);
+
+            if(!isDone)
+            {
+                isBlocked = true;
+            }
+        }
+
+        QVariantList reversed;
+        for(int i{unlocked.size() - 1}; i >= 0; --i)
+        {
+            reversed.append(unlocked[i]);
+        }
+
+        return reversed;
+    };
+
+    // Why uniform initialization causing task to be empty
+    QVariantList primaryTasks = mission.value("primary").toList();
+    QVariantList secondaryTasks = mission.value("secondary").toList();
+
+    combinedTasks.append(processObjectiveList(primaryTasks, "PRIMARY OBJECTIVES", 0));
+    combinedTasks.append(processObjectiveList(secondaryTasks, "SECONDARY OBJECTIVES", primaryTasks.size()));
+
+    return combinedTasks;
+}
+
+
+void MissionManager::toggleTaskCompletion(int taskIndex)
+{
+    if(!isValidIndex(currentIndex_))
+    {
+        return;
+    }
+
+    QVariantMap &currentMissionMap{missions_[currentIndex_]};
+
+    auto toggleInList = [&currentMissionMap](const QString &key, int index)
+    {
+        // Why uniform initialization doesn't work properly
+        QVariantList list = currentMissionMap[key].toList();
+
+        if(index >= 0 && index < list.size())
+        {
+            QVariantMap task = list[index].toMap();
+            task["isCompleted"] = !task["isCompleted"].toBool();
+            list[index] = task;
+            currentMissionMap[key] = list;
+            return true;
+        }
+        return false;
+    };
+
+    QVariantList primaryTasks = currentMissionMap["primary"].toList();
+    bool changed{false};
+
+    if(taskIndex < primaryTasks.size())
+    {
+        changed = toggleInList("primary", taskIndex);
+    }
+    else
+    {
+        changed = toggleInList("secondary", taskIndex - primaryTasks.size());
+    }
+
+    if(!changed)
+    {
+        return;
+    }
+
+    QString missionId = currentMissionMap["id"].toString();
+    for(auto &mission : allMissions_)
+    {
+        if(mission["id"].toString() == missionId)
+        {
+            mission = currentMissionMap;
+            break;
+        }
+    }
+
+    if(areAllTasksCompleted(currentMissionMap))
+    {
+        bool missionSuccess{true};
+        finishMission(missionId, missionSuccess);
+    }
+
+    saveMissions();
+
+    QModelIndex modelIndex = createIndex(currentIndex_, 0);
+    emit dataChanged(modelIndex, modelIndex, {TasksRole});}
+
+
+
+void MissionManager::finishMission(const QString &missionId, bool isSuccess)
+{
+    bool found{false};
+    for(auto &mission : allMissions_)
+    {
+        if(mission["id"].toString() == missionId)
+        {
+            mission["isCompleted"] = true;
+            mission["isSuccess"] = isSuccess;
+            mission["isActive"] = false;
+            found = true;
+            break;
+        }
+    }
+
+    if(!found)
+    {
+        return;
+    }
+
+    saveMissions();
+
+    beginResetModel();
+    updateFilteredMissions();
+
+    if (missions_.isEmpty())
+    {
+        currentIndex_ = -1;
+    }
+    else if (currentIndex_ >= missions_.size())
+    {
+        currentIndex_ = missions_.size() - 1;
+    }
+    endResetModel();
+
     emit currentIndexChanged();
 }
 

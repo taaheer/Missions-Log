@@ -46,6 +46,7 @@ qt_add_qml_module(appMissionsLog
         RESOURCES missions.json
         QML_FILES CustomScrollBar.qml
         QML_FILES CustomButton.qml
+        SOURCES
 )
 
 

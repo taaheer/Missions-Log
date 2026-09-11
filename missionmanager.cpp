@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <ranges>
+
 #include <QDebug>
 
 static QString getWritablePath()
@@ -173,13 +175,14 @@ void MissionManager::toggleMissionActive(int index)
 
     missions_[index]["isActive"] = newState;
 
-    for(auto &mission : allMissions_)
+    auto it = std::ranges::find_if(allMissions_, [&missionId](const auto& mission)
+                                   {
+                                       return mission["id"].toString() == missionId;
+                                   });
+
+    if (it != allMissions_.end())
     {
-        if(mission["id"].toString() == missionId)
-        {
-            mission["isActive"] = newState;
-            break;
-        }
+        (*it)["isActive"] = newState; // Modify the found element directly
     }
 
     saveMissions();
@@ -203,13 +206,10 @@ void MissionManager::setCurrentIndex(int index)
 
 void MissionManager::updateFilteredMissions()
 {
-
     missions_.clear();
 
-    for(const QVariant &item : allMissions_)
+    for(const QVariantMap &mission : allMissions_)
     {
-        QVariantMap mission{item.toMap()};
-
         bool isCompleted{mission["isCompleted"].toBool()};
 
         if(viewStatus_ == "current" && !isCompleted)
@@ -220,7 +220,6 @@ void MissionManager::updateFilteredMissions()
         {
             missions_.append(mission);
         }
-
     }
 }
 
@@ -272,18 +271,13 @@ bool MissionManager::areAllTasksCompleted(const QVariantMap &mission) const
 {
     auto checkList = [](const QVariantList &list)
     {
-        for(const auto &item : list)
-        {
-            if(!item.toMap().value("isCompleted").toBool())
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return std::ranges::all_of(list, [](const QVariant &item)
+                                   {
+            return item.toMap().value("isCompleted").toBool();
+        });
     };
 
-    return checkList(mission["primary"].toList()) && checkList(mission["secondary"].toList());
+    return checkList(mission.value("primary").toList()) && checkList(mission.value("secondary").toList());
 }
 
 void MissionManager::setViewStatus(const QString &status)
@@ -351,9 +345,10 @@ QVariantList MissionManager::currentTasks() const
         }
 
         QVariantList reversed;
-        for(int i{unlocked.size() - 1}; i >= 0; --i)
+
+        for(const auto &item : unlocked | std::views::reverse)
         {
-            reversed.append(unlocked[i]);
+            reversed.append(item);
         }
 
         return reversed;
@@ -430,8 +425,8 @@ void MissionManager::toggleTaskCompletion(int taskIndex)
 
     saveMissions();
 
-    QModelIndex modelIndex = createIndex(currentIndex_, 0);
-    emit dataChanged(modelIndex, modelIndex, {TasksRole});}
+    emit currentIndexChanged();
+}
 
 
 
@@ -442,6 +437,11 @@ void MissionManager::finishMission(const QString &missionId, bool isSuccess)
     {
         if(mission["id"].toString() == missionId)
         {
+            if(mission.value("isCompleted").toBool())
+            {
+                return;
+            }
+
             mission["isCompleted"] = true;
             mission["isSuccess"] = isSuccess;
             mission["isActive"] = false;

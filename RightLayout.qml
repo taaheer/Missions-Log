@@ -72,6 +72,16 @@ HexagonPanel{
                 Layout.fillWidth: true
                 clip: true
 
+                property real savedScrollY: 0
+                property bool isRestoringScroll: false
+
+                onModelChanged: {
+                    if(isRestoringScroll){
+                        contentY = savedScrollY;
+                        isRestoringScroll = false;
+                    }
+                }
+
                 Layout.leftMargin: 11
                 Layout.rightMargin: 22
 
@@ -135,9 +145,17 @@ HexagonPanel{
 
                                 MouseArea{
                                     anchors.fill: parent
-
                                     onClicked: {
-                                        MissionManager.toggleTaskCompletion(modelData.originalIndex)
+                                        let startMissionId = MissionManager.currentMission.id;
+
+                                        taskView.savedScrollY = taskView.contentY;
+                                        taskView.isRestoringScroll = true;
+
+                                        MissionManager.toggleTaskCompletion(modelData.originalIndex);
+
+                                        if (!MissionManager.currentMission || MissionManager.currentMission.id !== startMissionId) {
+                                            taskView.isRestoringScroll = false;
+                                        }
                                     }
                                 }
                             }

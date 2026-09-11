@@ -6,12 +6,13 @@ Text {
     property string displayText: ""
     property int index: 0
     property bool isDecoding: true
+    property int interval: 80
 
     text: isDecoding ? displayText : finalText
 
     Timer {
         id: decoderTimer
-        interval: 100
+        interval: control.interval
         repeat: true
         running: control.isDecoding
 

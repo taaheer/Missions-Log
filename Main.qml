@@ -228,13 +228,14 @@ ApplicationWindow {
                     }
 
                     ParallelAnimation{
+                        id: rightAnimation
                         running: true
                         NumberAnimation{
                             target: rightLayout
                             property: "opacity"
                             from: 0.0
                             to: 1.0
-                            duration: 700
+                            duration: 500
                             easing.type: Easing.OutQuad
                         }
 
@@ -243,8 +244,15 @@ ApplicationWindow {
                             property: "angle"
                             from: -90
                             to: 0
-                            duration: 700
+                            duration: 500
                             easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Connections{
+                        target: MissionManager
+                        function onViewStatusChanged(){
+                            rightAnimation.restart()
                         }
                     }
                 }

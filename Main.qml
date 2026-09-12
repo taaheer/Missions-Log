@@ -180,12 +180,13 @@ ApplicationWindow {
                         axis.z: 0
 
                         origin.x: leftLayout.width
-                        origin.y: leftLayout.height / 2
+                        origin.y: 0
 
-                        angle: -90
+                        angle: 90
                     }
 
                     ParallelAnimation{
+                        id: leftAnimation
                         running: true
                         NumberAnimation{
                             target: leftLayout
@@ -199,7 +200,7 @@ ApplicationWindow {
                         NumberAnimation{
                             target: leftRotation
                             property: "angle"
-                            from: -90
+                            from: 90
                             to: 0
                             duration: 700
                             easing.type: Easing.OutCubic
@@ -214,8 +215,6 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     cutLength: 26
 
-
-
                     opacity: 0
 
                     transform: Rotation{
@@ -225,9 +224,9 @@ ApplicationWindow {
                         axis.z: 0
 
                         origin.x: 0
-                        origin.y: rightLayout.height / 2
+                        origin.y: 0
 
-                        angle: -90
+                        angle: 90
                     }
 
                     ParallelAnimation{
@@ -245,17 +244,10 @@ ApplicationWindow {
                         NumberAnimation{
                             target: rightRotation
                             property: "angle"
-                            from: -90
+                            from: 90
                             to: 0
                             duration: 500
                             easing.type: Easing.OutCubic
-                        }
-                    }
-
-                    Connections{
-                        target: MissionManager
-                        function onViewStatusChanged(){
-                            rightAnimation.restart()
                         }
                     }
                 }

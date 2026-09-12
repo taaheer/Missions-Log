@@ -56,13 +56,10 @@ void MissionManager::setViewStatus(const QString &status)
     {
         filterModel_->setViewStatus(status);
 
-        currentIndex_ = -1;
-        emit currentIndexChanged();
+        int nextIndex = (filterModel_->rowCount() > 0) ? 0 : -1;
 
-        if (filterModel_->rowCount() > 0)
-        {
-            setCurrentIndex(0);
-        }
+        currentIndex_ = nextIndex;
+        emit currentIndexChanged();
 
         emit viewStatusChanged();
     }

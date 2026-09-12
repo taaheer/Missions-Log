@@ -10,6 +10,53 @@ HexagonPanel{
 
     strokeColor: currentColor
 
+    transform: Rotation{
+        id: rightRotation
+        axis.x: 0
+        axis.y: 1
+        axis.z: 0
+
+        origin.x: 0
+        origin.y: 0
+
+        angle: 20
+    }
+
+    ParallelAnimation{
+        id: transitionAnimation
+        running: true
+        NumberAnimation{
+            target: root
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 250
+            easing.type: Easing.OutQuad
+        }
+
+        NumberAnimation{
+            target: rightRotation
+            property: "angle"
+            from: 20
+            to: 0
+            duration: 250
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    property var lastMissionId: root.currentMission?.id
+
+    onCurrentMissionChanged: {
+        let newId = root.currentMission?.id;
+
+        if (newId !== lastMissionId) {
+            lastMissionId = newId;
+            transitionAnimation.restart();
+        }
+    }
+
+
+
     HexagonPanel{
         strokeColor: Theme.transparent
         anchors{

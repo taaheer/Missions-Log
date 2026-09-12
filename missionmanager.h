@@ -1,49 +1,43 @@
 #ifndef MISSIONMANAGER_H
 #define MISSIONMANAGER_H
 
-#include <QAbstractListModel>
+#include <QObject>
 #include <QQmlEngine>
+#include <QVariantMap>
+#include <QVariantList>
 
-class MissionManager : public QAbstractListModel
+class MissionModel;
+class MissionFilter;
+
+class MissionManager : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
 
+    Q_PROPERTY(QObject* proxyModel READ proxyModel CONSTANT)
+
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged FINAL)
     Q_PROPERTY(QVariantMap currentMission READ currentMission NOTIFY currentIndexChanged FINAL)
-    Q_PROPERTY(QVariantList currentTasks READ currentTasks  NOTIFY currentIndexChanged FINAL)
+    Q_PROPERTY(QVariantList currentTasks READ currentTasks NOTIFY currentIndexChanged FINAL)
     Q_PROPERTY(QString viewStatus READ viewStatus WRITE setViewStatus NOTIFY viewStatusChanged FINAL)
-public:
-    enum MissionRoles{
-        IdRole = Qt::UserRole + 1,
-        TitleRole,
-        CategoryRole,
-        StatusRole,
-        IsActiveRole,
-        IsSuccessRole,
-        TasksRole
-    };
-    Q_ENUM(MissionRoles)
 
+public:
     explicit MissionManager(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QHash<int, QByteArray> roleNames() const override;
+    QObject* proxyModel() const;
 
     Q_INVOKABLE void loadMissions(const QString &path);
-    Q_INVOKABLE void toggleMissionActive(int index);
+    Q_INVOKABLE void toggleMissionActive(int proxyIndex);
     Q_INVOKABLE void toggleTaskCompletion(int taskIndex);
-    Q_INVOKABLE void finishMission(const QString &missionId, bool isSuccess);
 
-    int currentIndex() const {return currentIndex_;}
+    int currentIndex() const { return currentIndex_; }
     void setCurrentIndex(int index);
 
     QVariantMap currentMission() const;
     QVariantList currentTasks() const;
 
-    const QString& viewStatus() const {return viewStatus_;}
+    const QString& viewStatus() const;
     void setViewStatus(const QString &status);
 
 signals:
@@ -51,15 +45,14 @@ signals:
     void viewStatusChanged();
 
 private:
-    void updateFilteredMissions();
     void saveMissions();
-    bool isValidIndex(int index) const {return index >= 0 && index < missions_.size();}
     bool areAllTasksCompleted(const QVariantMap &mission) const;
+    int sourceIndexFromMissionId(const QString &missionId) const;
 
-    QList<QVariantMap> allMissions_{};
-    QList<QVariantMap> missions_{};
+    MissionModel *sourceModel_{nullptr};
+    MissionFilter *filterModel_{nullptr};
+
     int currentIndex_{0};
-    QString viewStatus_{"current"};
 };
 
 #endif // MISSIONMANAGER_H

@@ -1,33 +1,37 @@
 #include "missionmanager.h"
+#include "missionmodel.h"
+#include "missionfilter.h"
 #include <QStandardPaths>
 #include <QDir>
 #include <QJsonParseError>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-
 #include <ranges>
-
 #include <QDebug>
 
 static QString getWritablePath()
 {
-    QString path{QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     QDir().mkpath(path);
 
     return QDir(path).filePath("missions.json");
 }
 
 MissionManager::MissionManager(QObject *parent)
-    : QAbstractListModel{parent}
+    : QObject{parent},
+    sourceModel_(new MissionModel(this)),
+    filterModel_(new MissionFilter(this))
 {
+    filterModel_->setSourceModel(sourceModel_);
+
     QString writablePath{getWritablePath()};
 
-    if(!QFile::exists(writablePath))
+    if (!QFile::exists(writablePath))
     {
-        if(!QFile::copy(":/qt/qml/MissionsLog/missions.json", writablePath))
+        if (!QFile::copy(":/qt/qml/MissionsLog/missions.json", writablePath))
         {
-            qWarning() << "Faied to copy template file!";
+            qWarning() << "Failed to copy template file!";
         }
         else
         {
@@ -38,56 +42,30 @@ MissionManager::MissionManager(QObject *parent)
     loadMissions(writablePath);
 }
 
-
-int MissionManager::rowCount(const QModelIndex &parent) const
-{
-    if(parent.isValid())
-    {
-        return 0;
-    }
-
-    return missions_.size();
+QObject* MissionManager::proxyModel() const {
+    return filterModel_;
 }
 
-
-
-QVariant MissionManager::data(const QModelIndex &index, int role) const
-{
-    if(!index.isValid() || !isValidIndex(index.row()))
-    {
-        return QVariant();
-    }
-
-    const QVariantMap &mission{missions_[index.row()]};
-    switch (role)
-    {
-    case IdRole:        return mission.value("id");
-    case TitleRole:     return mission.value("title");
-    case CategoryRole:  return mission.value("category");
-    case StatusRole:    return mission.value("status");
-    case IsActiveRole:  return mission.value("isActive");
-    case IsSuccessRole: return mission.value("isSuccess");
-    case TasksRole:     return mission.value("tasks");
-    default:            return QVariant();
-    }
+const QString& MissionManager::viewStatus() const {
+    return filterModel_->viewStatus();
 }
 
-
-
-QHash<int, QByteArray> MissionManager::roleNames() const
+void MissionManager::setViewStatus(const QString &status)
 {
-    static const QHash<int, QByteArray> roles = []() {
-        QHash<int, QByteArray> r;
-        r[IdRole]        = "id";
-        r[TitleRole]     = "title";
-        r[CategoryRole]  = "category";
-        r[StatusRole]    = "status";
-        r[IsActiveRole]  = "isActive";
-        r[IsSuccessRole] = "isSuccess";
-        r[TasksRole]     = "tasks";
-        return r;
-    }();
-    return roles;
+    if (filterModel_->viewStatus() != status)
+    {
+        filterModel_->setViewStatus(status);
+
+        currentIndex_ = -1;
+        emit currentIndexChanged();
+
+        if (filterModel_->rowCount() > 0)
+        {
+            setCurrentIndex(0);
+        }
+
+        emit viewStatusChanged();
+    }
 }
 
 void MissionManager::loadMissions(const QString &path)
@@ -123,79 +101,63 @@ void MissionManager::loadMissions(const QString &path)
 
     if(!missionsJson.contains("mission") || !missionsJson["mission"].isObject())
     {
-        qWarning() << "FAIL: 'mission' object is missing or invalid!";
+        qWarning() << "Fail: 'mission' object is missing or invalid!";
         return;
     }
 
     QJsonObject categories{missionsJson["mission"].toObject()};
 
-    beginResetModel();
-    allMissions_.clear();
+    QList<QVariantMap> loadedMissions;
 
-    auto processCategory{[this](const QJsonValue &val, const QString &categoryName)
-                         {
-                             if(!val.isArray())
-                             {
-                                 return;
-                             }
-                             for(const QJsonValue &itemVal : val.toArray())
-                             {
-                                 QVariantMap missionMap{itemVal.toObject().toVariantMap()};
-                                 missionMap["category"] = categoryName;
-                                 allMissions_.append(missionMap);
-                             }
-                         }};
+    auto processCategory = [&loadedMissions](const QJsonValue &val, const QString &categoryName)
+    {
+        if (!val.isArray())
+        {
+            return;
+        }
 
-
+        for (const QJsonValue &itemVal : val.toArray())
+        {
+            QVariantMap missionMap{itemVal.toObject().toVariantMap()};
+            missionMap["category"] = categoryName;
+            loadedMissions.append(missionMap);
+        }
+    };
 
     if(categories.contains("main"))
     {
         processCategory(categories["main"], "main");
     }
 
-    if(categories.contains("side"))
+    if (categories.contains("side"))
     {
         processCategory(categories["side"], "side");
     }
 
-    updateFilteredMissions();
-    endResetModel();
+    sourceModel_->setMissions(loadedMissions);
+    setCurrentIndex(filterModel_->rowCount() > 0 ? 0 : -1);
 }
 
-void MissionManager::toggleMissionActive(int index)
+void MissionManager::toggleMissionActive(int proxyIndex)
 {
-    if(!isValidIndex(index))
+    if(proxyIndex < 0 || proxyIndex >= filterModel_->rowCount())
     {
         return;
     }
 
-    bool currentState{missions_[index]["isActive"].toBool()};
-    QString missionId{missions_[index]["id"].toString()};
-    bool newState{!currentState};
+    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(proxyIndex, 0));
+    int sourceRow = sourceIdx.row();
 
-    missions_[index]["isActive"] = newState;
+    QVariantMap mission = sourceModel_->getMission(sourceRow);
+    mission["isActive"] = !mission.value("isActive").toBool();
 
-    auto it = std::ranges::find_if(allMissions_, [&missionId](const auto& mission)
-                                   {
-                                       return mission["id"].toString() == missionId;
-                                   });
-
-    if (it != allMissions_.end())
-    {
-        (*it)["isActive"] = newState; // Modify the found element directly
-    }
-
+    sourceModel_->updateMission(sourceRow, mission);
     saveMissions();
-
-    QModelIndex modelIndex = createIndex(index, 0);
-    emit dataChanged(modelIndex, modelIndex, {IsActiveRole});
 }
-
-
 
 void MissionManager::setCurrentIndex(int index)
 {
-    if(currentIndex_ == index || index < 0 || !isValidIndex(index))
+    if(currentIndex_ == index || index < -1 || index >= filterModel_->rowCount())
     {
         return;
     }
@@ -204,113 +166,20 @@ void MissionManager::setCurrentIndex(int index)
     emit currentIndexChanged();
 }
 
-void MissionManager::updateFilteredMissions()
-{
-    missions_.clear();
-
-    for(const QVariantMap &mission : allMissions_)
-    {
-        bool isCompleted{mission["isCompleted"].toBool()};
-
-        if(viewStatus_ == "current" && !isCompleted)
-        {
-            missions_.append(mission);
-        }
-        else if(viewStatus_ == "finished" && isCompleted)
-        {
-            missions_.append(mission);
-        }
-    }
-}
-
-void MissionManager::saveMissions()
-{
-    QJsonObject categories{};
-    QJsonArray main{};
-    QJsonArray side{};
-
-    for(const auto &missionMap : allMissions_)
-    {
-        QJsonObject mission{QJsonObject::fromVariantMap(missionMap)};
-
-        QString cat{mission["category"].toString()};
-        mission.remove("category");
-
-        if(cat == "side")
-        {
-            side.append(mission);
-        }
-        else
-        {
-            main.append(mission);
-        }
-    }
-
-    categories["main"] = main;
-    categories["side"] = side;
-
-    QJsonObject rootObj{
-        {"mission", categories}
-    };
-
-    QString path{getWritablePath()};
-    QFile file{path};
-
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-    {
-        file.write(QJsonDocument(rootObj).toJson(QJsonDocument::Indented));
-        file.close();
-    }
-    else
-    {
-        qWarning() << "Failed to save missions to path:" << path;
-    }
-}
-
-bool MissionManager::areAllTasksCompleted(const QVariantMap &mission) const
-{
-    auto checkList = [](const QVariantList &list)
-    {
-        return std::ranges::all_of(list, [](const QVariant &item)
-                                   {
-            return item.toMap().value("isCompleted").toBool();
-        });
-    };
-
-    return checkList(mission.value("primary").toList()) && checkList(mission.value("secondary").toList());
-}
-
-void MissionManager::setViewStatus(const QString &status)
-{
-    if(viewStatus_ == status)
-    {
-        return;
-    }
-
-    beginResetModel();
-
-    viewStatus_ = status;
-    updateFilteredMissions();
-    currentIndex_ = (missions_.isEmpty() ? -1 : 0);
-
-    endResetModel();
-
-    emit viewStatusChanged();
-    emit currentIndexChanged();
-}
-
 QVariantMap MissionManager::currentMission() const
 {
-    if(!isValidIndex(currentIndex_))
+    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
     {
         return QVariantMap();
     }
-    return missions_[currentIndex_];
+
+    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(currentIndex_, 0));
+    return sourceModel_->getMission(sourceIdx.row());
 }
 
 QVariantList MissionManager::currentTasks() const
 {
-    if(!isValidIndex(currentIndex_))
+    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
     {
         return QVariantList();
     }
@@ -324,13 +193,12 @@ QVariantList MissionManager::currentTasks() const
         QVariantList unlocked;
         bool isBlocked{false};
 
-        for(int i{0}; i < tasks.size(); ++i)
+        for (int i{0}; i < tasks.size(); ++i)
         {
-            QVariantMap temp{tasks[i].toMap()};
+            QVariantMap temp = tasks[i].toMap();
             temp["section"] = sectionName;
             temp["originalIndex"] = indexOffset + i;
 
-            bool isDone{temp["isCompleted"].toBool()};
             if(isBlocked)
             {
                 break;
@@ -338,14 +206,14 @@ QVariantList MissionManager::currentTasks() const
 
             unlocked.append(temp);
 
-            if(!isDone)
+            if(!temp.value("isCompleted").toBool())
             {
                 isBlocked = true;
             }
         }
 
         QVariantList reversed;
-
+        reversed.reserve(unlocked.size());
         for(const auto &item : unlocked | std::views::reverse)
         {
             reversed.append(item);
@@ -364,112 +232,132 @@ QVariantList MissionManager::currentTasks() const
     return combinedTasks;
 }
 
-
 void MissionManager::toggleTaskCompletion(int taskIndex)
 {
-    if(!isValidIndex(currentIndex_))
+    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
     {
         return;
     }
 
-    QVariantMap &currentMissionMap{missions_[currentIndex_]};
+    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(currentIndex_, 0));
+    int sourceRow = sourceIdx.row();
 
-    auto toggleInList = [&currentMissionMap](const QString &key, int index)
+    QVariantMap currentMissionMap{sourceModel_->getMission(sourceRow)};
+
+    auto toggleInList = [&currentMissionMap](const QString &key, int idx)
     {
-        // Why uniform initialization doesn't work properly
-        QVariantList list = currentMissionMap[key].toList();
+        QVariantList list = currentMissionMap.value(key).toList();
 
-        if(index >= 0 && index < list.size())
+        if (idx >= 0 && idx < list.size())
         {
-            QVariantMap task = list[index].toMap();
-            task["isCompleted"] = !task["isCompleted"].toBool();
-            list[index] = task;
+            QVariantMap task = list[idx].toMap();
+            task["isCompleted"] = !task.value("isCompleted").toBool();
+            list[idx] = task;
             currentMissionMap[key] = list;
             return true;
         }
         return false;
     };
 
-    QVariantList primaryTasks = currentMissionMap["primary"].toList();
-    bool changed{false};
-
-    if(taskIndex < primaryTasks.size())
-    {
-        changed = toggleInList("primary", taskIndex);
-    }
-    else
-    {
-        changed = toggleInList("secondary", taskIndex - primaryTasks.size());
-    }
+    QVariantList primaryTasks = currentMissionMap.value("primary").toList();
+    bool changed = (taskIndex < primaryTasks.size()) ? toggleInList("primary", taskIndex) : toggleInList("secondary", taskIndex - primaryTasks.size());
 
     if(!changed)
     {
         return;
     }
 
-    QString missionId = currentMissionMap["id"].toString();
-    for(auto &mission : allMissions_)
+
+    if (areAllTasksCompleted(currentMissionMap))
     {
-        if(mission["id"].toString() == missionId)
-        {
-            mission = currentMissionMap;
-            break;
-        }
+        currentMissionMap["isCompleted"] = true;
+        currentMissionMap["isSuccess"] = true;
+        currentMissionMap["isActive"] = false;
     }
 
-    if(areAllTasksCompleted(currentMissionMap))
-    {
-        bool missionSuccess{true};
-        finishMission(missionId, missionSuccess);
-    }
+    sourceModel_->updateMission(sourceRow, currentMissionMap);
 
     saveMissions();
 
-    emit currentIndexChanged();
+    if(filterModel_->rowCount() == 0)
+    {
+        setCurrentIndex(-1);
+    }
+    else if(currentIndex_ >= filterModel_->rowCount())
+    {
+        setCurrentIndex(filterModel_->rowCount() - 1);
+    }
+    else
+    {
+        emit currentIndexChanged();
+    }
 }
 
 
-
-void MissionManager::finishMission(const QString &missionId, bool isSuccess)
+void MissionManager::saveMissions()
 {
-    bool found{false};
-    for(auto &mission : allMissions_)
-    {
-        if(mission["id"].toString() == missionId)
-        {
-            if(mission.value("isCompleted").toBool())
-            {
-                return;
-            }
+    QJsonObject categories;
+    QJsonArray main, side;
 
-            mission["isCompleted"] = true;
-            mission["isSuccess"] = isSuccess;
-            mission["isActive"] = false;
-            found = true;
-            break;
+    for (const auto &missionMap : sourceModel_->getAllMissions())
+    {
+        QJsonObject mission = QJsonObject::fromVariantMap(missionMap);
+
+        QString cat{mission.value("category").toString()};
+        mission.remove("category");
+
+        if(cat == "side")
+        {
+            side.append(mission);
+        }
+        else
+        {
+            main.append(mission);
         }
     }
 
-    if(!found)
+    categories["main"] = main;
+    categories["side"] = side;
+
+    QJsonObject rootObj{{"mission", categories}};
+
+    QString path = getWritablePath();
+    QFile file{path};
+
+    if(file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        return;
+        file.write(QJsonDocument(rootObj).toJson(QJsonDocument::Indented));
+        file.close();
     }
-
-    saveMissions();
-
-    beginResetModel();
-    updateFilteredMissions();
-
-    if (missions_.isEmpty())
+    else
     {
-        currentIndex_ = -1;
+        qWarning() << "Failed to save missions to path: " << path;
     }
-    else if (currentIndex_ >= missions_.size())
-    {
-        currentIndex_ = missions_.size() - 1;
-    }
-    endResetModel();
-
-    emit currentIndexChanged();
 }
 
+bool MissionManager::areAllTasksCompleted(const QVariantMap &mission) const
+{
+    auto checkList = [](const QVariantList &list)
+    {
+        return std::ranges::all_of(list, [](const QVariant &item){
+            return item.toMap().value("isCompleted").toBool();
+        });
+    };
+
+    return checkList(mission.value("primary").toList()) && checkList(mission.value("secondary").toList());
+}
+
+int MissionManager::sourceIndexFromMissionId(const QString &missionId) const
+{
+    const auto missions = sourceModel_->getAllMissions();
+
+    for(auto [i, mission] : missions | std::views::enumerate)
+    {
+        if(mission.value("id").toString() == missionId)
+        {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
+}

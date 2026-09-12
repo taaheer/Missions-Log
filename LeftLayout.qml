@@ -37,7 +37,7 @@ HexagonPanel {
                         topMargin: 1
                     }
 
-                    model: MissionManager
+                    model: MissionManager.proxyModel
                     clip: true
                     spacing: 25
                     currentIndex: MissionManager.currentIndex

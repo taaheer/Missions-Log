@@ -28,9 +28,10 @@ HexagonPanel{
 
             HexagonPanel{
                 Layout.fillWidth: true
-                Layout.preferredHeight: title.implicitHeight + 4
+                Layout.preferredHeight: title.implicitHeight + 2
                 fillColor: Theme.primaryAccent
                 strokeColor: Theme.transparent
+                Layout.bottomMargin: 2
                 cutLength: 20
 
                 ColumnLayout{
@@ -147,6 +148,7 @@ HexagonPanel{
                                     anchors.fill: parent
                                     onClicked: {
                                         let startMissionId = MissionManager.currentMission.id;
+                                        let view = taskView;
 
                                         taskView.savedScrollY = taskView.contentY;
                                         taskView.isRestoringScroll = true;
@@ -154,7 +156,7 @@ HexagonPanel{
                                         MissionManager.toggleTaskCompletion(modelData.originalIndex);
 
                                         if (!MissionManager.currentMission || MissionManager.currentMission.id !== startMissionId) {
-                                            taskView.isRestoringScroll = false;
+                                            view.isRestoringScroll = false;
                                         }
                                     }
                                 }

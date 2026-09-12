@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MissionsLog VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
@@ -48,6 +48,8 @@ qt_add_qml_module(appMissionsLog
         QML_FILES CustomScrollBar.qml
         QML_FILES CustomButton.qml
         SOURCES
+        SOURCES missionmodel.h missionmodel.cpp
+        SOURCES missionfilter.h missionfilter.cpp
 )
 
 

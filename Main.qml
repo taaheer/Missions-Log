@@ -152,6 +152,7 @@ ApplicationWindow {
 
             RowLayout{
                 id: main
+
                 anchors{
                     fill: parent
                     topMargin: 11
@@ -212,6 +213,8 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     cutLength: 26
+
+
 
                     opacity: 0
 

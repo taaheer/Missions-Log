@@ -284,8 +284,19 @@ ApplicationWindow {
                 CustomButton{
                     text: "New Mission"
                     strokeColor: hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+
+                    onClicked: {
+                        newMissionPopup.open();
+                    }
                 }
             }
         }
+    }
+
+    MissionPopup{
+        id: newMissionPopup
+        anchors.centerIn: parent
+        width: parent.width * 0.7
+        height: parent.height * 0.8
     }
 }

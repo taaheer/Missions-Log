@@ -50,6 +50,9 @@ qt_add_qml_module(appMissionsLog
         SOURCES
         SOURCES missionmodel.h missionmodel.cpp
         SOURCES missionfilter.h missionfilter.cpp
+        QML_FILES MissionPopup.qml
+        QML_FILES SwipeButton.qml
+        QML_FILES CustomTextField.qml
 )
 
 

@@ -290,6 +290,13 @@ void MissionManager::toggleTaskCompletion(int taskIndex)
     }
 }
 
+void MissionManager::addMission(QVariantMap mission)
+{
+    sourceModel_->addMission(mission);
+    saveMissions();
+    emit currentIndexChanged();
+}
+
 
 void MissionManager::saveMissions()
 {

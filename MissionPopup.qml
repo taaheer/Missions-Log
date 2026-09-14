@@ -28,12 +28,14 @@ Popup {
 
     function getTaskTypeLabel(currentType, index){
         let relativeCount = 1;
-        for (let i = 0; i < index; ++i) {
-            if (stagedTaskModel.get(i).type === currentType) {
+        for(let i = 0; i < index; ++i){
+            if(stagedTaskModel.get(i).type === currentType){
                 relativeCount++;
             }
         }
+
         return `${currentType} ${relativeCount}`;
+
     }
 
     function startMission(){
@@ -65,7 +67,6 @@ Popup {
         var generatedId = (isSideQuest ? "s" : "m") + 1
 
         var missionObj = {
-            "id": generatedId,
             "title": missionTitle.text.toUpperCase(),
             "category": categoryString,
             "isCompleted": false,
@@ -79,17 +80,7 @@ Popup {
             missionObj["secondary"] = secondary;
         }
 
-        var rootData = {
-            "mission": [
-                {
-                    "main": isSideQuest ? [] : [missionObj],
-                    "side": isSideQuest ? [missionObj] : []
-                }
-            ]
-        };
-
-        var jsonString = JSON.stringify(rootData, null, 4);
-        console.log("Saving Mission JSON for C++:\n", jsonString);
+        MissionManager.addMission(missionObj);
 
         stagedTaskModel.clear();
         stagedTaskModel.append({ task: "", detail: "", type: "Primary" });

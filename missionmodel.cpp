@@ -56,6 +56,27 @@ void MissionModel::setMissions(const QList<QVariantMap> &missions)
     endResetModel();
 }
 
+void MissionModel::addMission(QVariantMap mission)
+{
+    QString category = mission.value("category").toString();
+    mission["id"] = generateNextId(category);
+
+    qsizetype index = missions_.size();
+
+    if (category == "main")
+    {
+        auto sideMissionIterator = std::ranges::find_if(missions_, [](const QVariantMap &item) {
+            return item.value("category").toString() != "main";
+        });
+
+        index = (sideMissionIterator != missions_.end()) ? std::distance(missions_.begin(), sideMissionIterator) : missions_.size();
+    }
+
+    beginInsertRows(QModelIndex(), index, index);
+    missions_.insert(index, mission);
+    endInsertRows();
+}
+
 void MissionModel::updateMission(int row, const QVariantMap &mission)
 {
     if (row >= 0 && row < missions_.size())
@@ -77,4 +98,25 @@ QVariantMap MissionModel::getMission(int row) const
 QList<QVariantMap> MissionModel::getAllMissions() const
 {
     return missions_;
+}
+
+QString MissionModel::generateNextId(const QString &category) const
+{
+    const QChar prefix = (category == "side") ? QChar('s') : QChar('m');
+    int maxNum = 0;
+    for(const auto &missions : missions_)
+    {
+        QString id = missions.value("id").toString();
+        if(id.startsWith(prefix))
+        {
+            bool ok{false};
+            int num = id.sliced(1).toInt(&ok);
+            if(ok && num > maxNum)
+            {
+                maxNum = num;
+            }
+        }
+    }
+
+    return QString(prefix) + QString::number(maxNum + 1);
 }

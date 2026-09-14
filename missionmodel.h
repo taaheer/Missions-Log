@@ -25,10 +25,13 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setMissions(const QList<QVariantMap> &missions);
+    void addMission(QVariantMap mission);
     void updateMission(int row, const QVariantMap &mission);
 
     QVariantMap getMission(int row) const;
     QList<QVariantMap> getAllMissions() const;
+
+    QString generateNextId(const QString &category) const;
 
 private:
     QList<QVariantMap> missions_;

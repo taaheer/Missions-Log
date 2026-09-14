@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void loadMissions(const QString &path);
     Q_INVOKABLE void toggleMissionActive(int proxyIndex);
     Q_INVOKABLE void toggleTaskCompletion(int taskIndex);
+    Q_INVOKABLE void addMission(QVariantMap mission);
 
     int currentIndex() const { return currentIndex_; }
     void setCurrentIndex(int index);

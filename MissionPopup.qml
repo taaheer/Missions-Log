@@ -7,7 +7,11 @@ Popup {
     modal: true
     focus: true
 
+
     property color missionColor: missionType.checked ? Theme.altPrimaryColor : Theme.primaryColor
+
+    property int editIndex: -1
+    property bool isEditMode: editIndex >= 0
 
     ListModel{
         id: stagedTaskModel
@@ -15,7 +19,57 @@ Popup {
             task: "";
             detail: ""
             type: "Primary"
+            isCompleted: false
         }
+    }
+
+    onClosed: {
+        taskStack.currentIndex = 0
+        stagedTaskModel.clear()
+    }
+
+    function openForAdd(){
+        root.editIndex = -1;
+        missionTitle.text = "";
+        missionType.checked = false;
+        stagedTaskModel.clear();
+        stagedTaskModel.append({task: "", detail: "", type: "Primary", isCompleted: false})
+        root.open();
+    }
+
+    function openForEdit(index, missionData){
+        root.editIndex = index;
+        missionTitle.text = missionData.title;
+        missionType.checked = (missionData.category === "side");
+        stagedTaskModel.clear();
+
+        let batchTasks = [];
+
+        let pTasks = missionData.primary || [];
+        for(let i = 0; i < pTasks.length; ++i) {
+            batchTasks.push({
+                                task: pTasks[i].name,
+                                detail: pTasks[i].detail || "",
+                                type: "Primary",
+                                isCompleted: pTasks[i].isCompleted || false
+                            });
+        }
+
+        let sTasks = missionData.secondary || [];
+        for(let j = 0; j < sTasks.length; ++j) {
+            batchTasks.push({
+                                task: sTasks[j].name,
+                                detail: sTasks[j].detail || "",
+                                type: "Secondary",
+                                isCompleted: sTasks[j].isCompleted || false
+                            });
+        }
+
+        batchTasks.push({ task: "", detail: "", type: "Primary", isCompleted: false });
+
+        stagedTaskModel.append(batchTasks);
+
+        root.open();
     }
 
     function updateTaskField(index, name, value){
@@ -39,18 +93,18 @@ Popup {
     }
 
     function startMission(){
-        var primary = [];
-        var secondary = [];
+        let primary = [];
+        let secondary = [];
 
-        for(var i = 0; i < stagedTaskModel.count; ++i){
-            var item = stagedTaskModel.get(i);
+        for(let i = 0; i < stagedTaskModel.count; ++i){
+            let item = stagedTaskModel.get(i);
 
             if(item.task.trim() !== ""){
-                var taskObj = {
+                let taskObj = {
                     "name": item.task.toUpperCase(),
                     "detail": item.detail,
                     "category": item.type.toUpperCase() + " OBJECTIVE",
-                    "isCompleted": false
+                    "isCompleted": item.isCompleted
                 };
 
                 if(item.type === "Primary"){
@@ -62,15 +116,12 @@ Popup {
             }
         }
 
-        var isSideQuest = missionType.checked;
-        var categoryString = isSideQuest ? "side" : "main"
-        var generatedId = (isSideQuest ? "s" : "m") + 1
+        let isSideQuest = missionType.checked;
+        let categoryString = isSideQuest ? "side" : "main"
 
-        var missionObj = {
+        let missionObj = {
             "title": missionTitle.text.toUpperCase(),
             "category": categoryString,
-            "isCompleted": false,
-            "isSuccess": false,
             "isActive": !isSideQuest,
             "primary": primary
         };
@@ -80,10 +131,15 @@ Popup {
             missionObj["secondary"] = secondary;
         }
 
-        MissionManager.addMission(missionObj);
+        if (root.isEditMode) {
+            MissionManager.editMission(root.editIndex, missionObj);
+        }
+        else {
+            missionObj["isCompleted"] = false;
+            missionObj["isSuccess"] = false;
+            MissionManager.addMission(missionObj);
+        }
 
-        stagedTaskModel.clear();
-        stagedTaskModel.append({ task: "", detail: "", type: "Primary" });
         root.close();
     }
 
@@ -272,7 +328,7 @@ Popup {
         }
 
         CustomButton{
-            text: "Start Mission"
+            text: root.isEditMode ? "Save Changes" : "Start Mission"
             Layout.fillWidth: true
             enabled: missionTitle.text.trim() !== "" && stagedTaskModel.count > 0
             fillColor: enabled ? root.missionColor : Qt.darker(root.missionColor, 3)

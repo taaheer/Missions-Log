@@ -61,16 +61,7 @@ void MissionModel::addMission(QVariantMap mission)
     QString category{mission.value("category").toString()};
     mission["id"] = generateNextId(category);
 
-    qsizetype index = missions_.size();
-
-    if (category == "main")
-    {
-        auto sideMissionIterator = std::ranges::find_if(missions_, [](const QVariantMap &item) {
-            return item.value("category").toString() != "main";
-        });
-
-        index = (sideMissionIterator != missions_.end()) ? std::distance(missions_.begin(), sideMissionIterator) : missions_.size();
-    }
+    qsizetype index{missions_.size()};
 
     beginInsertRows(QModelIndex(), index, index);
     missions_.insert(index, mission);
@@ -82,7 +73,8 @@ void MissionModel::updateMission(int row, const QVariantMap &mission)
     if (row >= 0 && row < missions_.size())
     {
         missions_[row] = mission;
-        emit dataChanged(index(row, 0), index(row, 0));
+        QModelIndex index{createIndex(row, 0)};
+        emit dataChanged(index, index);
     }
 }
 

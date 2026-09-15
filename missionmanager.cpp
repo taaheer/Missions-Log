@@ -159,7 +159,7 @@ void MissionManager::toggleMissionActive(int proxyIndex)
 
 void MissionManager::setCurrentIndex(int index)
 {
-    if(currentIndex_ == index || index < -1 || !isValidIndex(index))
+    if(currentIndex_ == index || index >= 0 && !isValidIndex(index))
     {
         return;
     }
@@ -307,7 +307,6 @@ void MissionManager::toggleMissionStatus(int index)
 
     QVariantMap missionMap{sourceModel_->getMission(sourceRow)};
 
-    // Mark as completed, apply success state, and deactivate it
     missionMap["isCompleted"] =  !missionMap["isCompleted"].toBool();
     missionMap["isSuccess"] = false;
     missionMap["isActive"] = false;
@@ -315,8 +314,6 @@ void MissionManager::toggleMissionStatus(int index)
     sourceModel_->updateMission(sourceRow, missionMap);
     saveMissions();
 
-    // Re-evaluate the current index in case the mission gets filtered out
-    // of the current view (e.g., drops out of the "Current" list).
     if(filterModel_->rowCount() == 0)
     {
         setCurrentIndex(-1);
@@ -335,6 +332,36 @@ void MissionManager::addMission(QVariantMap mission)
 {
     sourceModel_->addMission(mission);
     saveMissions();
+    emit currentIndexChanged();
+}
+
+void MissionManager::editMission(int index, QVariantMap updatedMission)
+{
+    if(!isValidIndex(index))
+    {
+        return;
+    }
+
+    QModelIndex sourceIndex{filterModel_->mapToSource(filterModel_->index(index, 0))};
+    int sourceRow{sourceIndex.row()};
+    QVariantMap existingMission{sourceModel_->getMission(sourceRow)};
+
+    existingMission["title"] = updatedMission.value("title");
+    existingMission["category"] = updatedMission.value("category");
+    existingMission["primary"] = updatedMission.value("primary");
+
+    if(updatedMission.contains("secondary"))
+    {
+        existingMission["secondary"] = updatedMission.value("secondary");
+    }
+    else
+    {
+        existingMission.remove("secondary");
+    }
+
+    sourceModel_->updateMission(sourceRow, existingMission);
+    saveMissions();
+
     emit currentIndexChanged();
 }
 

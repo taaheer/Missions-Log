@@ -5,8 +5,10 @@ import QtQuick.Controls
 HexagonPanel{
     id: root
 
+    signal editMissionRequested()
+
     property var currentMission: MissionManager.currentMission
-    property color currentColor: currentMission.category === "main" ? Theme.primaryColor : Theme.altPrimaryColor
+    property color currentColor: currentMission.category === "side" ?  Theme.altPrimaryColor : Theme.primaryColor
 
     strokeColor: currentColor
 
@@ -72,6 +74,8 @@ HexagonPanel{
             }
 
             HexagonPanel{
+                visible: MissionManager.currentIndex >= 0
+
                 Layout.fillWidth: true
                 Layout.preferredHeight: title.implicitHeight + 2
                 fillColor: Theme.primaryAccent
@@ -111,6 +115,7 @@ HexagonPanel{
                                 id: missionMenu
                                 MenuItem {
                                     text: "Edit Mission"
+                                    onTriggered: root.editMissionRequested()
                                 }
                                 MenuItem {
                                     text: root.currentMission?.isCompleted ? "Reopen Mission" : "Finish Mission"
@@ -120,9 +125,8 @@ HexagonPanel{
                         }
 
                         Text{
-
                             id: title
-                            text: root.currentMission?.title ?? "Click Add New Mission"
+                            text: root.currentMission?.title ?? ""
                             font.pointSize: 18
                             wrapMode: Text.WordWrap
                             color: root.currentColor

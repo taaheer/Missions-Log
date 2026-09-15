@@ -217,6 +217,10 @@ ApplicationWindow {
 
                     opacity: 0
 
+                    onEditMissionRequested: {
+                        newMissionPopup.openForEdit(MissionManager.currentIndex, MissionManager.currentMission);
+                    }
+
                     transform: Rotation{
                         id: rightRotation
                         axis.x: 0
@@ -286,7 +290,7 @@ ApplicationWindow {
                     strokeColor: hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
 
                     onClicked: {
-                        newMissionPopup.open();
+                        newMissionPopup.openForAdd();
                     }
                 }
             }

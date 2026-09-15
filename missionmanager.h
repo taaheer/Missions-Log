@@ -32,6 +32,7 @@ public:
     Q_INVOKABLE void toggleTaskCompletion(int taskIndex);
     Q_INVOKABLE void toggleMissionStatus(int index);
     Q_INVOKABLE void addMission(QVariantMap mission);
+    Q_INVOKABLE void editMission(int index, QVariantMap updatedMission);
 
     int currentIndex() const { return currentIndex_; }
     void setCurrentIndex(int index);

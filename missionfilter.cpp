@@ -20,13 +20,14 @@ void MissionFilter::setViewStatus(const QString &status)
 bool MissionFilter::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
     const MissionModel *model = qobject_cast<MissionModel*>(sourceModel());
+
     if (!model)
     {
         return false;
     }
 
-    QVariantMap mission = model->getMission(source_row);
-    bool isCompleted = mission.value("isCompleted").toBool();
+    QVariantMap mission{model->getMission(source_row)};
+    bool isCompleted{mission.value("isCompleted").toBool()};
 
     if (viewStatus_ == "current")
     {

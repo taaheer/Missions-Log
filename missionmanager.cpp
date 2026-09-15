@@ -12,7 +12,7 @@
 
 static QString getWritablePath()
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QString path{QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)};
     QDir().mkpath(path);
 
     return QDir(path).filePath("missions.json");
@@ -56,13 +56,18 @@ void MissionManager::setViewStatus(const QString &status)
     {
         filterModel_->setViewStatus(status);
 
-        int nextIndex = (filterModel_->rowCount() > 0) ? 0 : -1;
+        int nextIndex{(filterModel_->rowCount() > 0) ? 0 : -1};
 
         currentIndex_ = nextIndex;
         emit currentIndexChanged();
 
         emit viewStatusChanged();
     }
+}
+
+bool MissionManager::isValidIndex(int index) const
+{
+    return index >= 0 && index < filterModel_->rowCount();
 }
 
 void MissionManager::loadMissions(const QString &path)
@@ -137,15 +142,15 @@ void MissionManager::loadMissions(const QString &path)
 
 void MissionManager::toggleMissionActive(int proxyIndex)
 {
-    if(proxyIndex < 0 || proxyIndex >= filterModel_->rowCount())
+    if(!isValidIndex(proxyIndex))
     {
         return;
     }
 
-    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(proxyIndex, 0));
-    int sourceRow = sourceIdx.row();
+    QModelIndex sourceIndex{filterModel_->mapToSource(filterModel_->index(proxyIndex, 0))};
+    int sourceRow{sourceIndex.row()};
 
-    QVariantMap mission = sourceModel_->getMission(sourceRow);
+    QVariantMap mission{sourceModel_->getMission(sourceRow)};
     mission["isActive"] = !mission.value("isActive").toBool();
 
     sourceModel_->updateMission(sourceRow, mission);
@@ -154,7 +159,7 @@ void MissionManager::toggleMissionActive(int proxyIndex)
 
 void MissionManager::setCurrentIndex(int index)
 {
-    if(currentIndex_ == index || index < -1 || index >= filterModel_->rowCount())
+    if(currentIndex_ == index || index < -1 || !isValidIndex(index))
     {
         return;
     }
@@ -165,18 +170,18 @@ void MissionManager::setCurrentIndex(int index)
 
 QVariantMap MissionManager::currentMission() const
 {
-    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
+    if(!isValidIndex(currentIndex_))
     {
         return QVariantMap();
     }
 
-    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(currentIndex_, 0));
-    return sourceModel_->getMission(sourceIdx.row());
+    QModelIndex sourceIndex{filterModel_->mapToSource(filterModel_->index(currentIndex_, 0))};
+    return sourceModel_->getMission(sourceIndex.row());
 }
 
 QVariantList MissionManager::currentTasks() const
 {
-    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
+    if(!isValidIndex(currentIndex_))
     {
         return QVariantList();
     }
@@ -192,7 +197,7 @@ QVariantList MissionManager::currentTasks() const
 
         for (int i{0}; i < tasks.size(); ++i)
         {
-            QVariantMap temp = tasks[i].toMap();
+            QVariantMap temp{tasks[i].toMap()};
             temp["section"] = sectionName;
             temp["originalIndex"] = indexOffset + i;
 
@@ -231,13 +236,13 @@ QVariantList MissionManager::currentTasks() const
 
 void MissionManager::toggleTaskCompletion(int taskIndex)
 {
-    if(currentIndex_ < 0 || currentIndex_ >= filterModel_->rowCount())
+    if(!isValidIndex(currentIndex_))
     {
         return;
     }
 
-    QModelIndex sourceIdx = filterModel_->mapToSource(filterModel_->index(currentIndex_, 0));
-    int sourceRow = sourceIdx.row();
+    QModelIndex sourceIndex{filterModel_->mapToSource(filterModel_->index(currentIndex_, 0))};
+    int sourceRow{sourceIndex.row()};
 
     QVariantMap currentMissionMap{sourceModel_->getMission(sourceRow)};
 
@@ -257,7 +262,7 @@ void MissionManager::toggleTaskCompletion(int taskIndex)
     };
 
     QVariantList primaryTasks = currentMissionMap.value("primary").toList();
-    bool changed = (taskIndex < primaryTasks.size()) ? toggleInList("primary", taskIndex) : toggleInList("secondary", taskIndex - primaryTasks.size());
+    bool changed{(taskIndex < primaryTasks.size()) ? toggleInList("primary", taskIndex) : toggleInList("secondary", taskIndex - primaryTasks.size())};
 
     if(!changed)
     {
@@ -290,6 +295,42 @@ void MissionManager::toggleTaskCompletion(int taskIndex)
     }
 }
 
+void MissionManager::toggleMissionStatus(int index)
+{
+    if(!isValidIndex(index))
+    {
+        return;
+    }
+
+    QModelIndex sourceIndex{filterModel_->mapToSource(filterModel_->index(index, 0))};
+    int sourceRow{sourceIndex.row()};
+
+    QVariantMap missionMap{sourceModel_->getMission(sourceRow)};
+
+    // Mark as completed, apply success state, and deactivate it
+    missionMap["isCompleted"] =  !missionMap["isCompleted"].toBool();
+    missionMap["isSuccess"] = false;
+    missionMap["isActive"] = false;
+
+    sourceModel_->updateMission(sourceRow, missionMap);
+    saveMissions();
+
+    // Re-evaluate the current index in case the mission gets filtered out
+    // of the current view (e.g., drops out of the "Current" list).
+    if(filterModel_->rowCount() == 0)
+    {
+        setCurrentIndex(-1);
+    }
+    else if(currentIndex_ >= filterModel_->rowCount())
+    {
+        setCurrentIndex(filterModel_->rowCount() - 1);
+    }
+    else
+    {
+        emit currentIndexChanged();
+    }
+}
+
 void MissionManager::addMission(QVariantMap mission)
 {
     sourceModel_->addMission(mission);
@@ -305,7 +346,7 @@ void MissionManager::saveMissions()
 
     for (const auto &missionMap : sourceModel_->getAllMissions())
     {
-        QJsonObject mission = QJsonObject::fromVariantMap(missionMap);
+        QJsonObject mission{QJsonObject::fromVariantMap(missionMap)};
 
         QString cat{mission.value("category").toString()};
         mission.remove("category");
@@ -325,7 +366,7 @@ void MissionManager::saveMissions()
 
     QJsonObject rootObj{{"mission", categories}};
 
-    QString path = getWritablePath();
+    QString path{getWritablePath()};
     QFile file{path};
 
     if(file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
@@ -353,7 +394,7 @@ bool MissionManager::areAllTasksCompleted(const QVariantMap &mission) const
 
 int MissionManager::sourceIndexFromMissionId(const QString &missionId) const
 {
-    const auto missions = sourceModel_->getAllMissions();
+    const auto missions{sourceModel_->getAllMissions()};
 
     for(auto [i, mission] : missions | std::views::enumerate)
     {

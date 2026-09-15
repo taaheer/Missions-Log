@@ -55,8 +55,6 @@ HexagonPanel{
         }
     }
 
-
-
     HexagonPanel{
         strokeColor: Theme.transparent
         anchors{
@@ -91,6 +89,8 @@ HexagonPanel{
 
                     RowLayout{
                         Layout.fillWidth: true
+                        Layout.topMargin: 2
+
                         AnimatedBullets{
                             spacing: -18
                             pointSize: 14
@@ -98,15 +98,36 @@ HexagonPanel{
                             Layout.topMargin: -4
                             Layout.alignment: Qt.AlignTop
                             color: Qt.lighter(Theme.primaryAccent, 2)
+
+                            TapHandler {
+                                onTapped: missionMenu.popup()
+                            }
+
+                            HoverHandler {
+                                cursorShape: Qt.PointingHandCursor
+                            }
+
+                            Menu {
+                                id: missionMenu
+                                MenuItem {
+                                    text: "Edit Mission"
+                                }
+                                MenuItem {
+                                    text: root.currentMission?.isCompleted ? "Reopen Mission" : "Finish Mission"
+                                    onTriggered: MissionManager.toggleMissionStatus(MissionManager.currentIndex);
+                                }
+                            }
                         }
 
                         Text{
+
                             id: title
                             text: root.currentMission?.title ?? "Click Add New Mission"
                             font.pointSize: 18
                             wrapMode: Text.WordWrap
                             color: root.currentColor
                             Layout.fillWidth: true
+                            Layout.topMargin: 2
                             lineHeight: 0.8
                             Layout.alignment: Qt.AlignTop
                         }
@@ -191,9 +212,8 @@ HexagonPanel{
                                 Layout.leftMargin: modelData.isCompleted ? 10 : 2
                                 Layout.bottomMargin: 2
 
-                                MouseArea{
-                                    anchors.fill: parent
-                                    onClicked: {
+                                TapHandler {
+                                    onTapped: {
                                         let startMissionId = MissionManager.currentMission.id;
                                         let view = taskView;
 
@@ -206,6 +226,9 @@ HexagonPanel{
                                             view.isRestoringScroll = false;
                                         }
                                     }
+                                }
+                                HoverHandler {
+                                    cursorShape: Qt.PointingHandCursor
                                 }
                             }
 

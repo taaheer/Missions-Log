@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void loadMissions(const QString &path);
     Q_INVOKABLE void toggleMissionActive(int proxyIndex);
     Q_INVOKABLE void toggleTaskCompletion(int taskIndex);
+    Q_INVOKABLE void toggleMissionStatus(int index);
     Q_INVOKABLE void addMission(QVariantMap mission);
 
     int currentIndex() const { return currentIndex_; }
@@ -46,6 +47,7 @@ signals:
     void viewStatusChanged();
 
 private:
+    bool isValidIndex(int index) const;
     void saveMissions();
     bool areAllTasksCompleted(const QVariantMap &mission) const;
     int sourceIndexFromMissionId(const QString &missionId) const;

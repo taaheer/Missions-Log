@@ -21,7 +21,7 @@ QVariant MissionModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const QVariantMap &mission = missions_[index.row()];
+    const QVariantMap &mission{missions_[index.row()]};
     switch (role)
     {
     case IdRole:        return mission.value("id");
@@ -58,7 +58,7 @@ void MissionModel::setMissions(const QList<QVariantMap> &missions)
 
 void MissionModel::addMission(QVariantMap mission)
 {
-    QString category = mission.value("category").toString();
+    QString category{mission.value("category").toString()};
     mission["id"] = generateNextId(category);
 
     qsizetype index = missions_.size();
@@ -102,15 +102,17 @@ QList<QVariantMap> MissionModel::getAllMissions() const
 
 QString MissionModel::generateNextId(const QString &category) const
 {
-    const QChar prefix = (category == "side") ? QChar('s') : QChar('m');
-    int maxNum = 0;
-    for(const auto &missions : missions_)
+    const QChar prefix{(category == "side") ? QChar('s') : QChar('m')};
+    int maxNum{0};
+
+    for(const auto &mission : missions_)
     {
-        QString id = missions.value("id").toString();
+        QString id{mission.value("id").toString()};
+
         if(id.startsWith(prefix))
         {
             bool ok{false};
-            int num = id.sliced(1).toInt(&ok);
+            int num{id.sliced(1).toInt(&ok)};
             if(ok && num > maxNum)
             {
                 maxNum = num;
@@ -118,5 +120,5 @@ QString MissionModel::generateNextId(const QString &category) const
         }
     }
 
-    return QString(prefix) + QString::number(maxNum + 1);
+    return QString(1, prefix) + QString::number(maxNum + 1);
 }

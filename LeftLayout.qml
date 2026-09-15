@@ -128,11 +128,15 @@ HexagonPanel {
                         property color containerColor: model.category === "main" ? Theme.primaryColor : Theme.altPrimaryColor
                         property bool isSelected: missionList.currentIndex === index
 
-                        MouseArea{
+                        Item{
                             Layout.fillWidth: true
                             Layout.preferredHeight: missionListContainer.implicitHeight
-                            hoverEnabled: true
-                            onEntered: missionList.currentIndex = index
+
+                            HoverHandler{
+                                onHoveredChanged: {
+                                    missionList.currentIndex = index
+                                }
+                            }
 
                             RowLayout{
                                 id: missionListContainer
@@ -289,10 +293,8 @@ HexagonPanel {
                                                 text: model.isActive ? "Inactive" : "Active"
                                             }
 
-                                            MouseArea{
-                                                anchors.fill: parent
-
-                                                onClicked: MissionManager.toggleMissionActive(index)
+                                            TapHandler {
+                                                onTapped: MissionManager.toggleMissionActive(index)
                                             }
                                         }
                                     }

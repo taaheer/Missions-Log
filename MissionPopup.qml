@@ -194,11 +194,10 @@ Popup {
                                             pointSize: 14
                                         }
 
-                                        MouseArea {
-                                            anchors.fill: parent
+                                        TapHandler  {
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                var newType = (model.type === "Primary") ? "Secondary" : "Primary";
+                                            onTapped: {
+                                                let newType = (model.type === "Primary") ? "Secondary" : "Primary";
                                                 stagedTaskModel.setProperty(index, "type", newType);
                                             }
                                         }

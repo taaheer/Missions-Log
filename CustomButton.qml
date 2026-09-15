@@ -12,6 +12,8 @@ Button {
 
     implicitWidth: 200
 
+    HoverHandler { cursorShape: Qt.PointingHandCursor }
+
     contentItem: Text {
         text: control.text
         color: control.color

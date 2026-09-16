@@ -111,14 +111,14 @@ HexagonPanel{
                                 cursorShape: Qt.PointingHandCursor
                             }
 
-                            Menu {
+                            CustomMenu {
                                 id: missionMenu
-                                MenuItem {
+                                CustomMenuItem {
                                     text: "Edit Mission"
                                     onTriggered: root.editMissionRequested()
                                 }
-                                MenuItem {
-                                    text: root.currentMission?.isCompleted ? "Reopen Mission" : "Finish Mission"
+                                CustomMenuItem {
+                                    text: root.currentMission?.isCompleted ? "Reopen Mission" : "Finish Mission (Failed)"
                                     onTriggered: MissionManager.toggleMissionStatus(MissionManager.currentIndex);
                                 }
                             }

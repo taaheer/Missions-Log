@@ -53,6 +53,8 @@ qt_add_qml_module(appMissionsLog
         QML_FILES MissionPopup.qml
         QML_FILES SwipeButton.qml
         QML_FILES CustomTextField.qml
+        QML_FILES CustomMenu.qml
+        QML_FILES CustomMenuItem.qml
 )
 
 

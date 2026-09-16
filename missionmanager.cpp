@@ -252,7 +252,7 @@ void MissionManager::toggleTaskCompletion(int taskIndex)
 
         if (idx >= 0 && idx < list.size())
         {
-            QVariantMap task = list[idx].toMap();
+            QVariantMap task{list[idx].toMap()};
             task["isCompleted"] = !task.value("isCompleted").toBool();
             list[idx] = task;
             currentMissionMap[key] = list;
@@ -375,10 +375,10 @@ void MissionManager::saveMissions()
     {
         QJsonObject mission{QJsonObject::fromVariantMap(missionMap)};
 
-        QString cat{mission.value("category").toString()};
+        QString category{mission.value("category").toString()};
         mission.remove("category");
 
-        if(cat == "side")
+        if(category == "side")
         {
             side.append(mission);
         }

@@ -334,6 +334,22 @@ HexagonPanel {
                         }
                     }
                 }
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    visible: MissionManager.currentIndex < 0
+                    spacing: 12
+
+                    Text {
+                        text: "NO CURRENT MISSION"
+                        color: Theme.primaryColor
+                        font {
+                            pointSize: 16
+                            bold: true
+                            letterSpacing: 2
+                        }
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
             }
         }
     }

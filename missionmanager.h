@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE void toggleMissionStatus(int index);
     Q_INVOKABLE void addMission(QVariantMap mission);
     Q_INVOKABLE void editMission(int index, QVariantMap updatedMission);
+    Q_INVOKABLE void resetToDefault();
 
     int currentIndex() const { return currentIndex_; }
     void setCurrentIndex(int index);

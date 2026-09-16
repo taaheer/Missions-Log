@@ -267,9 +267,13 @@ Popup {
                                         width: 80
                                         height: 20
                                         strokeColor: root.missionColor
+                                        fillColor: hovered ? root.missionColor : Theme.transparent
+                                        color: hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
+
                                         onClicked: {
                                             stagedTaskModel.remove(index);
                                         }
+                                        strokeWidth: 3
                                     }
                                 }
 

@@ -72,6 +72,40 @@ HexagonPanel {
                             Layout.alignment: Qt.AlignVCenter
                             pointSize: 16
                             color: missionHeader.categoryColor
+
+                            TapHandler {
+                                onTapped: menu.popup()
+                            }
+
+                            HoverHandler {
+                                cursorShape: Qt.PointingHandCursor
+                            }
+
+                            CustomMenu {
+                                id: menu
+                                CustomMenuItem {
+                                    text: "Reset Everything"
+                                    onTriggered: confirmResetDialog.open()
+                                }
+                            }
+
+                            CustomDialog {
+                                id: confirmResetDialog
+                                title: "RESET DATA"
+                                standardButtons: Dialog.Yes | Dialog.No
+
+                                Text {
+                                    width: 320
+                                    text: "Are you sure you want to reset all missions? All unsaved progress will be lost."
+                                    color: Theme.primaryTextColor
+                                    font.pointSize: 12
+                                    wrapMode: Text.WordWrap
+                                }
+
+                                onAccepted: {
+                                    MissionManager.resetToDefault()
+                                }
+                            }
                         }
 
                         ColumnLayout{

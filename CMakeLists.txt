@@ -55,6 +55,7 @@ qt_add_qml_module(appMissionsLog
         QML_FILES CustomTextField.qml
         QML_FILES CustomMenu.qml
         QML_FILES CustomMenuItem.qml
+        QML_FILES CustomDialog.qml
 )
 
 

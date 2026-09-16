@@ -365,6 +365,31 @@ void MissionManager::editMission(int index, QVariantMap updatedMission)
     emit currentIndexChanged();
 }
 
+void MissionManager::resetToDefault()
+{
+    QString writablePath{getWritablePath()};
+    const QString resourcePath{":/qt/qml/MissionsLog/missions.json"};
+
+    if (QFile::exists(writablePath))
+    {
+        if (!QFile::remove(writablePath))
+        {
+            qWarning() << "Failed to remove existing writable file during reset!";
+            return;
+        }
+    }
+
+    if (!QFile::copy(resourcePath, writablePath))
+    {
+        qWarning() << "Failed to copy template file during reset!";
+        return;
+    }
+
+    QFile::setPermissions(writablePath, QFile::ReadOwner | QFile::WriteOwner);
+
+    loadMissions(writablePath);
+}
+
 
 void MissionManager::saveMissions()
 {

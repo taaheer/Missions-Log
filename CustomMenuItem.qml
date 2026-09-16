@@ -12,7 +12,7 @@ MenuItem {
     contentItem: Text {
         text: control.text
         font.pointSize: 12
-        color:  control.hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
+        color: control.hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
         verticalAlignment: Text.AlignVCenter
     }
 
@@ -21,6 +21,5 @@ MenuItem {
         cutLength: 15
         fillColor: control.hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.8)
         strokeColor: Theme.transparent
-
     }
 }

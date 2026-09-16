@@ -78,6 +78,7 @@ HexagonPanel {
                             spacing: -5
                             Layout.topMargin: 5
                             Text{
+                                id: sectionText
                                 Layout.topMargin: 3
                                 font{
                                     pointSize: 18
@@ -195,7 +196,6 @@ HexagonPanel {
                                                     xFactor: 0.2
                                                 }
                                             ]
-
                                         }
                                     }
 

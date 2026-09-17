@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    app.setWindowIcon(QIcon(":/qt/qml/MissionsLog/app.png"));
+
     app.setOrganizationName("Taaheer Labbe");
     app.setOrganizationDomain("taaheer.com");
     app.setApplicationName("Missions Log");

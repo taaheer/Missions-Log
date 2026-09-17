@@ -257,6 +257,9 @@ Popup {
                                                 stagedTaskModel.setProperty(index, "type", newType);
                                             }
                                         }
+                                        HoverHandler {
+                                            cursorShape: Qt.PointingHandCursor
+                                        }
                                     }
 
                                     CustomButton{

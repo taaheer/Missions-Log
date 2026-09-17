@@ -6,6 +6,8 @@
 #include <QVariantMap>
 #include <QVariantList>
 
+#include "mission.h"
+
 class MissionModel;
 class MissionFilter;
 
@@ -31,7 +33,7 @@ public:
     Q_INVOKABLE void toggleMissionActive(int proxyIndex);
     Q_INVOKABLE void toggleTaskCompletion(int taskIndex);
     Q_INVOKABLE void toggleMissionStatus(int index);
-    Q_INVOKABLE void addMission(QVariantMap mission);
+    Q_INVOKABLE void addMission(QVariantMap missionMap);
     Q_INVOKABLE void editMission(int index, QVariantMap updatedMission);
     Q_INVOKABLE void resetToDefault();
 
@@ -51,7 +53,7 @@ signals:
 private:
     bool isValidIndex(int index) const;
     void saveMissions();
-    bool areAllTasksCompleted(const QVariantMap &mission) const;
+    bool areAllTasksCompleted(const Mission &mission) const;
     int sourceIndexFromMissionId(const QString &missionId) const;
 
     MissionModel *sourceModel_{nullptr};

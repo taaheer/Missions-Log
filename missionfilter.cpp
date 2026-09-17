@@ -27,16 +27,15 @@ bool MissionFilter::filterAcceptsRow(int source_row, const QModelIndex &source_p
         return false;
     }
 
-    QVariantMap mission{model->getMission(source_row)};
-    bool isCompleted{mission.value("isCompleted").toBool()};
+    Mission mission{model->getMission(source_row)};
 
     if (viewStatus_ == "current")
     {
-        return !isCompleted;
+        return !mission.isCompleted;
     }
     else if (viewStatus_ == "finished")
     {
-        return isCompleted;
+        return mission.isCompleted;
     }
 
     return false;
@@ -51,15 +50,12 @@ bool MissionFilter::lessThan(const QModelIndex &source_left, const QModelIndex &
         return QSortFilterProxyModel::lessThan(source_left, source_right);
     }
 
-    QVariantMap mainMap{model->getMission(source_left.row())};
-    QVariantMap sideMap{model->getMission(source_right.row())};
+    Mission mainMission{model->getMission(source_left.row())};
+    Mission sideMission{model->getMission(source_right.row())};
 
-    QString mainCategory{mainMap.value("category").toString()};
-    QString sideCategory{sideMap.value("category").toString()};
-
-    if (mainCategory != sideCategory)
+    if (mainMission.category != sideMission.category)
     {
-        return mainCategory == "main";
+        return mainMission.category == "main";
     }
 
     return source_left.row() < source_right.row();

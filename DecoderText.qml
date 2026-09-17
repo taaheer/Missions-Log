@@ -2,7 +2,7 @@ import QtQuick
 
 Text {
     id: control
-    property string finalText: ""
+    required property string finalText
     property string displayText: ""
     property int index: 0
     property bool isDecoding: true

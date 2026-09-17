@@ -21,8 +21,17 @@ if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/external/qwindowkit/CMakeLists.txt")
     add_subdirectory(external/qwindowkit)
 endif()
 
+set(APP_ICONS "")
+if(APPLE)
+    list(APPEND APP_ICONS "${CMAKE_CURRENT_SOURCE_DIR}/app.icns")
+elseif(WIN32)
+    list(APPEND APP_ICONS "${CMAKE_CURRENT_SOURCE_DIR}/app.rc")
+endif()
+
+
 qt_add_executable(appMissionsLog
     main.cpp
+    ${APP_ICONS}
 )
 
 set_source_files_properties(Theme.qml PROPERTIES
@@ -31,31 +40,36 @@ set_source_files_properties(Theme.qml PROPERTIES
 
 qt_add_qml_module(appMissionsLog
     URI MissionsLog
+
     QML_FILES
-        Main.qml
-        QML_FILES Theme.qml
-        QML_FILES DecoderText.qml
-        QML_FILES Icon.qml
-        QML_FILES RepeatingCharacter.qml
-        QML_FILES AnimatedBullets.qml
-        QML_FILES WindowBarButton.qml
-        QML_FILES HexagonPanel.qml
-        QML_FILES LeftLayout.qml
-        QML_FILES RightLayout.qml
-        SOURCES
-        SOURCES missionmanager.h missionmanager.cpp
-        RESOURCES missions.json
-        QML_FILES CustomScrollBar.qml
-        QML_FILES CustomButton.qml
-        SOURCES
-        SOURCES missionmodel.h missionmodel.cpp
-        SOURCES missionfilter.h missionfilter.cpp
-        QML_FILES MissionPopup.qml
-        QML_FILES SwipeButton.qml
-        QML_FILES CustomTextField.qml
-        QML_FILES CustomMenu.qml
-        QML_FILES CustomMenuItem.qml
-        QML_FILES CustomDialog.qml
+    Main.qml
+    Theme.qml
+    DecoderText.qml
+    Icon.qml
+    RepeatingCharacter.qml
+    AnimatedBullets.qml
+    WindowBarButton.qml
+    HexagonPanel.qml
+    LeftLayout.qml
+    RightLayout.qml
+    CustomScrollBar.qml
+    CustomButton.qml
+    MissionPopup.qml
+    SwipeButton.qml
+    CustomTextField.qml
+    CustomMenu.qml
+    CustomMenuItem.qml
+    CustomDialog.qml
+
+    SOURCES
+    missionmanager.h missionmanager.cpp
+    missionmodel.h missionmodel.cpp
+    missionfilter.h missionfilter.cpp
+    mission.h
+
+    RESOURCES
+    missions.json
+    app.png
 )
 
 
@@ -68,13 +82,14 @@ set_target_properties(appMissionsLog PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE app.icns
     WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(appMissionsLog
     PRIVATE
-        Qt6::Quick
-        QWindowKit::Quick
+    Qt6::Quick
+    QWindowKit::Quick
 )
 
 install(TARGETS appMissionsLog
@@ -82,3 +97,9 @@ install(TARGETS appMissionsLog
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(APPLE)
+    set_source_files_properties(app.icns PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources
+    )
+endif()

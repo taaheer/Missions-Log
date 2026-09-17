@@ -2,6 +2,8 @@
 #define MISSIONMODEL_H
 
 #include <QAbstractListModel>
+#include <vector>
+#include "mission.h"
 
 class MissionModel : public QAbstractListModel
 {
@@ -24,17 +26,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void setMissions(const QList<QVariantMap> &missions);
-    void addMission(QVariantMap mission);
-    void updateMission(int row, const QVariantMap &mission);
+    void setMissions(const std::vector<Mission> &missions);
+    void addMission(const Mission& mission);
+    void updateMission(int row, const Mission &mission);
 
-    QVariantMap getMission(int row) const;
-    QList<QVariantMap> getAllMissions() const;
+    Mission getMission(int row) const;
+    const std::vector<Mission>& getAllMissions() const;
 
-    QString generateNextId(const QString &category) const;
+    std::string generateNextId(const std::string &category) const;
 
 private:
-    QList<QVariantMap> missions_;
+    std::vector<Mission> missions_;
 };
 
 #endif // MISSIONMODEL_H

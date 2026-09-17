@@ -1,5 +1,9 @@
 #include "missionmodel.h"
 
+#include <QString>
+#include <string_view>
+#include <charconv>
+
 MissionModel::MissionModel(QObject *parent)
     : QAbstractListModel{parent}
 {}
@@ -11,26 +15,24 @@ int MissionModel::rowCount(const QModelIndex &parent) const
         return 0;
     }
 
-    return missions_.size();
+    return static_cast<int>(missions_.size());
 }
 
 QVariant MissionModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= missions_.size())
+    if(!index.isValid() || index.row() < 0 || index.row() >= missions_.size())
     {
         return QVariant();
     }
 
-    const QVariantMap &mission{missions_[index.row()]};
+    const Mission &mission{missions_[index.row()]};
     switch (role)
     {
-    case IdRole:        return mission.value("id");
-    case TitleRole:     return mission.value("title");
-    case CategoryRole:  return mission.value("category");
-    case StatusRole:    return mission.value("status");
-    case IsActiveRole:  return mission.value("isActive");
-    case IsSuccessRole: return mission.value("isSuccess");
-    case TasksRole:     return mission.value("tasks");
+    case IdRole:        return QString::fromStdString(mission.id);
+    case TitleRole:     return QString::fromStdString(mission.title);
+    case CategoryRole:  return QString::fromStdString(mission.category);
+    case IsActiveRole:  return mission.isActive;
+    case IsSuccessRole: return mission.isSuccess;
     default:            return QVariant();
     }
 }
@@ -41,34 +43,32 @@ QHash<int, QByteArray> MissionModel::roleNames() const
         {IdRole, "id"},
         {TitleRole, "title"},
         {CategoryRole, "category"},
-        {StatusRole, "status"},
         {IsActiveRole, "isActive"},
-        {IsSuccessRole, "isSuccess"},
-        {TasksRole, "tasks"}
+        {IsSuccessRole, "isSuccess"}
     };
     return roles;
 }
 
-void MissionModel::setMissions(const QList<QVariantMap> &missions)
+void MissionModel::setMissions(const std::vector<Mission> &missions)
 {
     beginResetModel();
     missions_ = missions;
     endResetModel();
 }
 
-void MissionModel::addMission(QVariantMap mission)
+void MissionModel::addMission(const Mission& mission)
 {
-    QString category{mission.value("category").toString()};
-    mission["id"] = generateNextId(category);
+    Mission newMission{mission};
+    newMission.id = generateNextId(newMission.category);
 
-    qsizetype index{missions_.size()};
+    int index = static_cast<int>(missions_.size());
 
     beginInsertRows(QModelIndex(), index, index);
-    missions_.insert(index, mission);
+    missions_.push_back(newMission);
     endInsertRows();
 }
 
-void MissionModel::updateMission(int row, const QVariantMap &mission)
+void MissionModel::updateMission(int row, const Mission &mission)
 {
     if (row >= 0 && row < missions_.size())
     {
@@ -78,39 +78,40 @@ void MissionModel::updateMission(int row, const QVariantMap &mission)
     }
 }
 
-QVariantMap MissionModel::getMission(int row) const
+Mission MissionModel::getMission(int row) const
 {
     if(row >= 0 && row < missions_.size())
     {
         return missions_[row];
     }
-    return QVariantMap();
+    return Mission();
 }
 
-QList<QVariantMap> MissionModel::getAllMissions() const
+const std::vector<Mission>& MissionModel::getAllMissions() const
 {
     return missions_;
 }
 
-QString MissionModel::generateNextId(const QString &category) const
+std::string MissionModel::generateNextId(const std::string &category) const
 {
-    const QChar prefix{(category == "side") ? QChar('s') : QChar('m')};
+    const char prefix{(category == "side") ? 's' : 'm'};
     int maxNum{0};
 
     for(const auto &mission : missions_)
     {
-        QString id{mission.value("id").toString()};
+        std::string_view id{mission.id};
 
-        if(id.startsWith(prefix))
+        if(!id.empty() && id.front() == prefix)
         {
-            bool ok{false};
-            int num{id.sliced(1).toInt(&ok)};
-            if(ok && num > maxNum)
+            id.remove_prefix(1);
+            int num{0};
+            auto [ptr, ec] = std::from_chars(id.data(), id.data() + id.size(), num);
+            if(ec == std::errc() && num > maxNum)
             {
                 maxNum = num;
             }
         }
     }
 
-    return QString(1, prefix) + QString::number(maxNum + 1);
+    return prefix + std::to_string(maxNum + 1);
 }

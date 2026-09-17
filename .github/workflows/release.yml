@@ -33,7 +33,7 @@ jobs:
       run: cmake --build build --config Release
 
     - name: Stage files for Inno Setup
-      run: cmake --install build --config Release --prefix stage
+      run: cmake --install build --config Release --prefix "${{ github.workspace }}/stage"
 
     - name: Compile Inno Setup Script
       run: iscc installer.iss

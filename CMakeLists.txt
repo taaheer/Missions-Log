@@ -78,6 +78,7 @@ qt_add_qml_module(appMissionsLog
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 set_target_properties(appMissionsLog PROPERTIES
+    OUTPUT_NAME "MissionsLog"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.taaheer.missionslog
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -97,6 +98,13 @@ install(TARGETS appMissionsLog
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+qt_generate_deploy_qml_app_script(
+    TARGET appMissionsLog
+    OUTPUT_SCRIPT deploy_script
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT ${deploy_script})
 
 if(APPLE)
     set_source_files_properties(app.icns PROPERTIES

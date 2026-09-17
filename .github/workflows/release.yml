@@ -1,0 +1,46 @@
+name: Build and Release Missions Log
+
+on:
+    push:
+        tags:
+            - 'v*'
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Download the code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Qt 6.10
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+
+    - name: Prepare the build files
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build the application
+      run: cmake --build build --config Release
+
+    - name: Stage files for Inno Setup
+      run: cmake --install build --config Release --prefix stage
+
+    - name: Compile Inno Setup Script
+      run: iscc installer.iss
+
+    - name: Save the Installer file
+      uses: actions/upload-artifact@v4
+      with:
+        name: MissionsLog-Installer
+        path: Output/MissionsLog-Installer.exe

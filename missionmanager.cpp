@@ -37,6 +37,23 @@ static Task parseTask(const QJsonObject obj)
     return task;
 }
 
+static std::vector<Task> parseTasksFromQML(const QVariantList list)
+{
+    std::vector<Task> tasks;
+
+    for(const QVariant& item : list)
+    {
+        QVariantMap map = item.toMap();
+        Task task;
+        task.name = map.value("name").toString().toStdString();
+        task.detail = map.value("detail").toString().toStdString();
+        task.isCompleted = map.value("isCompleted").toBool();
+
+        tasks.push_back(task);
+    }
+    return tasks;
+}
+
 static Mission parseMission(const QJsonObject& obj, const std::string& defaultCategory)
 {
     Mission mission;
@@ -411,11 +428,17 @@ void MissionManager::toggleMissionStatus(int index)
 
 void MissionManager::addMission(QVariantMap missionMap)
 {
-    Mission m;
-    m.title = missionMap.value("title").toString().toStdString();
-    m.category = missionMap.value("category").toString().toStdString();
+    Mission mission;
+    mission.title = missionMap.value("title").toString().toStdString();
+    mission.category = missionMap.value("category").toString().toStdString();
 
-    sourceModel_->addMission(m);
+    mission.primary = parseTasksFromQML(missionMap.value("primary").toList());
+
+    if (missionMap.contains("secondary")) {
+        mission.secondary = parseTasksFromQML(missionMap.value("secondary").toList());
+    }
+
+    sourceModel_->addMission(mission);
     saveMissions();
     emit currentIndexChanged();
 }
@@ -434,6 +457,16 @@ void MissionManager::editMission(int index, QVariantMap updatedMission)
 
     existingMission.title = updatedMission.value("title").toString().toStdString();
     existingMission.category = updatedMission.value("category").toString().toStdString();
+
+    existingMission.primary = parseTasksFromQML(updatedMission.value("primary").toList());
+
+    if (updatedMission.contains("secondary"))
+    {
+        existingMission.secondary = parseTasksFromQML(updatedMission.value("secondary").toList());
+    } else
+    {
+        existingMission.secondary.clear();
+    }
 
     sourceModel_->updateMission(sourceRow, existingMission);
     saveMissions();

@@ -14,9 +14,9 @@ struct Mission {
     std::string id;
     std::string title;
     std::string category;
-    bool isActive = false;
-    bool isCompleted = false;
-    bool isSuccess = false;
+    bool isActive{false};
+    bool isCompleted{false};
+    bool isSuccess{false};
 
     std::vector<Task> primary;
     std::vector<Task> secondary;

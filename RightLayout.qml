@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -164,6 +165,10 @@ HexagonPanel{
                 section.criteria: ViewSection.FullString
 
                 section.delegate: Item{
+                    id: sectionDelegate
+
+                    required property string section 
+
                     width: taskView.width
                     height: categoryId.implicitHeight + 9
 
@@ -177,7 +182,7 @@ HexagonPanel{
                             leftMargin: 25
                         }
 
-                        text: section
+                        text: sectionDelegate.section
                         color: root.currentColor
                         font{
                             pointSize: 16
@@ -187,6 +192,11 @@ HexagonPanel{
                 }
 
                 delegate: ColumnLayout{
+                    id: delegate
+
+                    required property var modelData
+                    required property int index
+
                     width: taskView.width
 
                     opacity: modelData.isCompleted ? 0.5 : 1.0
@@ -202,18 +212,18 @@ HexagonPanel{
                         RowLayout{
                             anchors{
                                 left: parent.left
-                                leftMargin: modelData.isCompleted ? 15 : 24
+                                leftMargin: delegate.modelData.isCompleted ? 15 : 24
                                 verticalCenter: parent.verticalCenter
                             }
 
                             spacing: 10
 
                             Text{
-                                text: modelData.isCompleted ? "✓" : "▶"
+                                text: delegate.modelData.isCompleted ? "✓" : "▶"
 
                                 color: root.currentColor;
-                                font.pointSize: modelData.isCompleted ? 20 : 30
-                                Layout.leftMargin: modelData.isCompleted ? 10 : 2
+                                font.pointSize: delegate.modelData.isCompleted ? 20 : 30
+                                Layout.leftMargin: delegate.modelData.isCompleted ? 10 : 2
                                 Layout.bottomMargin: 2
 
                                 TapHandler {
@@ -224,7 +234,7 @@ HexagonPanel{
                                         taskView.savedScrollY = taskView.contentY;
                                         taskView.isRestoringScroll = true;
 
-                                        MissionManager.toggleTaskCompletion(modelData.originalIndex);
+                                        MissionManager.toggleTaskCompletion(delegate.modelData.originalIndex);
 
                                         if (!MissionManager.currentMission || MissionManager.currentMission.id !== startMissionId) {
                                             view.isRestoringScroll = false;
@@ -239,10 +249,10 @@ HexagonPanel{
 
                             Text{
                                 id: taskTitle
-                                text: modelData.name
+                                text: delegate.modelData.name
                                 color: Theme.primaryTextColor
 
-                                Layout.leftMargin: modelData.isCompleted ? -3 : 3
+                                Layout.leftMargin: delegate.modelData.isCompleted ? -3 : 3
 
                                 font{
                                     pointSize: 16
@@ -253,7 +263,7 @@ HexagonPanel{
                     }
                     Text{
                         id: detail
-                        text: modelData.detail
+                        text: delegate.modelData.detail
                         wrapMode: Text.WordWrap
                         color: "white"
                         Layout.fillWidth: true

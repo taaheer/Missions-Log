@@ -1,11 +1,11 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Universal
-// import QtCore
 
 import MissionsLog
 
-import QWindowKit
+import QWindowKit // qmllint disable import
 
 ApplicationWindow {
     id: window
@@ -29,10 +29,12 @@ ApplicationWindow {
     background: Rectangle{
         color: Qt.alpha(Theme.primaryColor, 0.1)
     }
-
+    
     WindowAgent{
         id: windowAgent
     }
+
+    // qmllint disable unqualified
 
     Component.onCompleted: {
 
@@ -55,6 +57,7 @@ ApplicationWindow {
             windowAgent.setWindowAttribute("blur-effect", "none")
         }
     }
+    // qmllint enable unqualified
 
     ColumnLayout{
         anchors.fill: parent

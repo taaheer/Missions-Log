@@ -1,13 +1,15 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 
 ScrollBar {
+    id: control
     policy: ScrollBar.AlwaysOn
 
     property bool frontVisible: true
 
     contentItem: Rectangle {
-        visible: frontVisible
+        visible: control.frontVisible
         color: Theme.primaryColor
     }
 

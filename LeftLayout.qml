@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -64,6 +65,8 @@ HexagonPanel {
                         id: missionHeader
                         spacing: 1
 
+                        required property string section 
+
                         property color categoryColor: section == "main" ? Theme.primaryColor : Theme.altPrimaryColor
 
                         AnimatedBullets{
@@ -119,7 +122,7 @@ HexagonPanel {
                                     capitalization: Font.AllUppercase
                                 }
                                 color: missionHeader.categoryColor
-                                text: section === "main" ? "Main Missions" : "Side Quests"
+                                text: missionHeader.section === "main" ? "Main Missions" : "Side Quests"
                             }
                             Row {
                                 spacing: 2
@@ -157,6 +160,9 @@ HexagonPanel {
                     delegate: ColumnLayout{
                         id: delegate
 
+                        required property var model 
+                        required property int index 
+
                         width: ListView.view.width
                         Layout.fillWidth: true
 
@@ -169,7 +175,7 @@ HexagonPanel {
 
                             HoverHandler{
                                 onHoveredChanged: {
-                                    missionList.currentIndex = index
+                                    missionList.currentIndex = delegate.index
                                 }
                             }
 
@@ -217,10 +223,6 @@ HexagonPanel {
 
                                             color: Qt.lighter(parent.fillColor, 1.4)
 
-                                            font{
-                                                weight: Font.Black
-                                            }
-
                                             transform: [
                                                 Scale{
                                                     xScale: 1.8
@@ -250,8 +252,8 @@ HexagonPanel {
                                             mirrored: true
 
                                             fillColor: MissionManager.viewStatus === "finished"
-                                                       ? (model.isSuccess ? delegate.containerColor : "red")
-                                                       : (model.isActive ? delegate.containerColor : Theme.secondaryColor)
+                                                       ? (delegate.model.isSuccess ? delegate.containerColor : "red")
+                                                       : (delegate.model.isActive ? delegate.containerColor : Theme.secondaryColor)
                                             strokeColor: Theme.transparent
 
                                             height: 18
@@ -267,12 +269,12 @@ HexagonPanel {
                                                 }
 
                                                 text: MissionManager.viewStatus === "finished"
-                                                      ? (model.isSuccess ? "COMPLETED" : "FAILED")
-                                                      : (model.isActive ? "ACTIVE" : "INACTIVE")
+                                                      ? (delegate.model.isSuccess ? "COMPLETED" : "FAILED")
+                                                      : (delegate.model.isActive ? "ACTIVE" : "INACTIVE")
 
                                                 color: MissionManager.viewStatus === "finished"
-                                                       ? (model.isSuccess ? Theme.secondaryColor : Theme.primaryTextColor)
-                                                       : (model.isActive ? Theme.secondaryColor : Theme.primaryTextColor)
+                                                       ? (delegate.model.isSuccess ? Theme.secondaryColor : Theme.primaryTextColor)
+                                                       : (delegate.model.isActive ? Theme.secondaryColor : Theme.primaryTextColor)
                                             }
                                         }
 
@@ -290,7 +292,7 @@ HexagonPanel {
 
                                             lineHeight: 0.8
 
-                                            text: model.title
+                                            text: delegate.model.title
                                             wrapMode: Text.WordWrap
                                             color: Theme.primaryTextColor
                                         }
@@ -324,11 +326,11 @@ HexagonPanel {
 
                                                 }
                                                 color: delegate.containerColor
-                                                text: model.isActive ? "Inactive" : "Active"
+                                                text: delegate.model.isActive ? "Inactive" : "Active"
                                             }
 
                                             TapHandler {
-                                                onTapped: MissionManager.toggleMissionActive(index)
+                                                onTapped: MissionManager.toggleMissionActive(delegate.index)
                                             }
                                         }
                                     }

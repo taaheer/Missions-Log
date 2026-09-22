@@ -1,0 +1,5 @@
+{
+    "cmake.environment": {
+        "PATH": "${env:PATH};C:/QtProjects/Missions-Log/build/external/qwindowkit/out/bin;C:/Qt/6.11.2/mingw_64/bin"
+    }
+}

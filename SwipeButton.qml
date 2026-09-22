@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 
@@ -7,7 +8,7 @@ Button {
     property color color
 
     contentItem: Text{
-        text: parent.text
+        text: control.text
         color: control.color
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

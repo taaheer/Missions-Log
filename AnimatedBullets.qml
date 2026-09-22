@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 
@@ -14,6 +15,8 @@ ColumnLayout{
         Text{
             id: bullet
 
+            required property int index
+
             readonly property bool darkEven: control.setDarkEven && index % 2 === 1
 
             text: "•"
@@ -27,7 +30,7 @@ ColumnLayout{
 
 
                 PauseAnimation {
-                    duration: index * 300
+                    duration: bullet.index * 300
                 }
 
                 NumberAnimation{

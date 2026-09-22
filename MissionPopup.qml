@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -217,7 +218,15 @@ Popup {
 
                 Repeater{
                     model: stagedTaskModel
+                    
                     Item{
+                        id: delegateItem 
+                        
+                        required property string type
+                        required property string task
+                        required property string detail
+                        required property int index
+
                         width: taskStack.width
                         height: taskStack.height
 
@@ -242,7 +251,7 @@ Popup {
                                     Text{
                                         anchors.centerIn: parent
 
-                                        text: root.getTaskTypeLabel(model.type, index)
+                                        text: root.getTaskTypeLabel(delegateItem.type, delegateItem.index)
 
                                         color: root.missionColor
                                         font{
@@ -253,8 +262,8 @@ Popup {
                                         TapHandler  {
                                             cursorShape: Qt.PointingHandCursor
                                             onTapped: {
-                                                let newType = (model.type === "Primary") ? "Secondary" : "Primary";
-                                                stagedTaskModel.setProperty(index, "type", newType);
+                                                let newType = (delegateItem.type === "Primary") ? "Secondary" : "Primary";
+                                                stagedTaskModel.setProperty(delegateItem.index, "type", newType);
                                             }
                                         }
                                         HoverHandler {
@@ -274,7 +283,7 @@ Popup {
                                         color: hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
 
                                         onClicked: {
-                                            stagedTaskModel.remove(index);
+                                            stagedTaskModel.remove(delegateItem.index);
                                         }
                                         strokeWidth: 3
                                     }
@@ -282,19 +291,19 @@ Popup {
 
                                 CustomTextField{
                                     id: taskTitle
-                                    text: model.task
+                                    text: delegateItem.task
                                     placeholderText: "Title here..."
                                     font.pointSize: 14
                                     Layout.fillWidth: true
                                     color: Theme.primaryTextColor
                                     strokeColor: root.missionColor
 
-                                    onTextEdited: updateTaskField(index, "task", text)
+                                    onTextEdited: root.updateTaskField(delegateItem.index, "task", text)
                                 }
 
                                 CustomTextField{
                                     id: taskDetail
-                                    text: model.detail
+                                    text: delegateItem.detail
                                     placeholderText: "Detail here..."
                                     font.pointSize: 12
                                     Layout.fillWidth: true
@@ -305,7 +314,7 @@ Popup {
                                     mirrored: true
                                     cutLength: 20
 
-                                    onTextEdited: updateTaskField(index, "detail", text)
+                                    onTextEdited: root.updateTaskField(delegateItem.index, "detail", text)
                                 }
                             }
                         }
@@ -327,7 +336,10 @@ Popup {
             count: taskStack.count
             currentIndex: taskStack.currentIndex
             Layout.alignment: Qt.AlignHCenter
+
             delegate: Text {
+                required property int index 
+
                 text: index === taskStack.currentIndex ? "▲" : "△"
                 color: root.missionColor
                 opacity: index === taskStack.currentIndex ? 1.0 : 0.4
@@ -341,6 +353,7 @@ Popup {
             fillColor: enabled ? root.missionColor : Qt.darker(root.missionColor, 3)
             strokeColor: root.missionColor
             color: Theme.secondaryColor
+
             onClicked: {
                 root.startMission();
             }

@@ -21,10 +21,11 @@ jobs:
     - name: Install Qt 6.10
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.10.0'
+        version: '6.10.*'
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2022_64'
+        cache: true
 
     - name: Prepare the build files
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
@@ -38,8 +39,9 @@ jobs:
     - name: Compile Inno Setup Script
       run: iscc installer.iss
 
-    - name: Save the Installer file
-      uses: actions/upload-artifact@v4
-      with:
-        name: MissionsLog-Installer
-        path: Output/MissionsLog-Installer.exe
+    - name: Publish to GitHub Release
+          uses: softprops/action-gh-release@v2
+          with:
+            tag_name: build-${{ github.sha }}
+            name: "Missions Log Build (${{ github.sha }})"
+            files: Output/MissionsLog-Installer.exe

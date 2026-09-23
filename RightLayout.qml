@@ -114,12 +114,15 @@ HexagonPanel{
 
                             CustomMenu {
                                 id: missionMenu
+                                strokeColor: root.currentColor
                                 CustomMenuItem {
-                                    text: "Edit Mission"
+                                    text: qsTr("Edit Mission")
+                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.secondaryColor, 0.8)
                                     onTriggered: root.editMissionRequested()
                                 }
                                 CustomMenuItem {
-                                    text: root.currentMission?.isCompleted ? "Reopen Mission" : "Finish Mission (Failed)"
+                                    text: root.currentMission?.isCompleted ? qsTr("Reopen Mission") : qsTr("Finish Mission (Failed)")
+                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.secondaryColor, 0.8)
                                     onTriggered: MissionManager.toggleMissionStatus(MissionManager.currentIndex);
                                 }
                             }

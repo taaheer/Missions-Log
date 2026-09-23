@@ -5,6 +5,8 @@ import QtQuick.Controls
 Menu {
     id: control
 
+    required property color strokeColor
+
     contentItem: ListView {
         implicitWidth: 200
         implicitHeight: contentHeight + 12
@@ -28,5 +30,6 @@ Menu {
     background: HexagonPanel {
         mirrored: true
         cutLength: 20
+        strokeColor: control.strokeColor
     }
 }

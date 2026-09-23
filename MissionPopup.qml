@@ -170,7 +170,7 @@ Popup {
 
         CustomTextField{
             id: missionTitle
-            placeholderText: "Type Mission..."
+            placeholderText: qsTr("Type Mission...")
             font.pointSize: 14
             color: root.missionColor
             Layout.fillWidth: true
@@ -185,7 +185,7 @@ Popup {
 
             Button{
                 id: missionType
-                text: checked ? "Side Quest" : "Main Mission"
+                text: checked ? qsTr("Side Quest") : qsTr("Main Mission")
                 checkable: true
                 checked: false
                 Layout.rightMargin: 8
@@ -273,7 +273,7 @@ Popup {
 
                                     CustomButton{
                                         anchors.right: parent.right
-                                        text: "Delete"
+                                        text: qsTr("Delete")
                                         pointSize: 8
                                         visible: stagedTaskModel.count > 1
                                         width: 80
@@ -292,7 +292,7 @@ Popup {
                                 CustomTextField{
                                     id: taskTitle
                                     text: delegateItem.task
-                                    placeholderText: "Title here..."
+                                    placeholderText: qsTr("Title here...")
                                     font.pointSize: 14
                                     Layout.fillWidth: true
                                     color: Theme.primaryTextColor
@@ -304,7 +304,7 @@ Popup {
                                 CustomTextField{
                                     id: taskDetail
                                     text: delegateItem.detail
-                                    placeholderText: "Detail here..."
+                                    placeholderText: qsTr("Detail here...")
                                     font.pointSize: 12
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
@@ -347,7 +347,7 @@ Popup {
         }
 
         CustomButton{
-            text: root.isEditMode ? "Save Changes" : "Start Mission"
+            text: root.isEditMode ? qsTr("Save Changes") : qsTr("Start Mission")
             Layout.fillWidth: true
             enabled: missionTitle.text.trim() !== "" && stagedTaskModel.count > 0
             fillColor: enabled ? root.missionColor : Qt.darker(root.missionColor, 3)

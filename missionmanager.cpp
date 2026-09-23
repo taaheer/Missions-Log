@@ -93,6 +93,18 @@ static QJsonObject taskToJson(const Task& task)
     return obj;
 }
 
+static QVariantList tasksToVariantList(const std::vector<Task>& tasks) {
+    QVariantList list;
+    for(const auto& task : tasks) 
+    {
+        QVariantMap map;
+        map["name"] = QString::fromStdString(task.name);
+        map["detail"] = QString::fromStdString(task.detail);
+        map["isCompleted"] = task.isCompleted;
+        list.append(map);
+    }
+    return list;
+}
 
 MissionManager::MissionManager(QObject *parent)
     : QObject{parent},
@@ -272,6 +284,13 @@ QVariantMap MissionManager::currentMission() const
     map["isActive"] = m.isActive;
     map["isCompleted"] = m.isCompleted;
     map["isSuccess"] = m.isSuccess;
+
+    map["primary"] = tasksToVariantList(m.primary);
+    
+    if(!m.secondary.empty()) 
+    {
+        map["secondary"] = tasksToVariantList(m.secondary);
+    }
 
     return map;
 }

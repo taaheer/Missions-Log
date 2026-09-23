@@ -272,7 +272,7 @@ ApplicationWindow {
                 spacing: 20
 
                 CustomButton{
-                    text: "Current"
+                    text: qsTr("Current")
                     strokeColor: MissionManager.viewStatus === "current" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
                     onClicked: {
                         MissionManager.viewStatus = "current"
@@ -280,7 +280,7 @@ ApplicationWindow {
                 }
 
                 CustomButton{
-                    text: "Finished Quests"
+                    text: qsTr("Finished Quests")
                     strokeColor: MissionManager.viewStatus === "finished" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
                     onClicked: {
                         MissionManager.viewStatus = "finished"
@@ -289,7 +289,7 @@ ApplicationWindow {
 
 
                 CustomButton{
-                    text: "New Mission"
+                    text: qsTr("New Mission")
                     strokeColor: hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
 
                     onClicked: {

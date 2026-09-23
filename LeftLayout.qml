@@ -87,7 +87,7 @@ HexagonPanel {
                             CustomMenu {
                                 id: menu
                                 CustomMenuItem {
-                                    text: "Reset Everything"
+                                    text: qsTr("Reset Everything")
                                     onTriggered: confirmResetDialog.open()
                                 }
                             }
@@ -99,7 +99,7 @@ HexagonPanel {
 
                                 Text {
                                     width: 320
-                                    text: "Are you sure you want to reset all missions? All unsaved progress will be lost."
+                                    text: qsTr("Are you sure you want to reset all missions? All unsaved progress will be lost.")
                                     color: Theme.primaryTextColor
                                     font.pointSize: 12
                                     wrapMode: Text.WordWrap
@@ -122,7 +122,7 @@ HexagonPanel {
                                     capitalization: Font.AllUppercase
                                 }
                                 color: missionHeader.categoryColor
-                                text: missionHeader.section === "main" ? "Main Missions" : "Side Quests"
+                                text: missionHeader.section === "main" ? qsTr("Main Missions") : qsTr("Side Quests")
                             }
                             Row {
                                 spacing: 2
@@ -326,7 +326,7 @@ HexagonPanel {
 
                                                 }
                                                 color: delegate.containerColor
-                                                text: delegate.model.isActive ? "Inactive" : "Active"
+                                                text: delegate.model.isActive ? qsTr("Inactive") : qsTr("Active")
                                             }
 
                                             TapHandler {
@@ -376,7 +376,7 @@ HexagonPanel {
                     spacing: 12
 
                     Text {
-                        text: "NO CURRENT MISSION"
+                        text: qsTr("NO CURRENT MISSION")
                         color: Theme.primaryColor
                         font {
                             pointSize: 16

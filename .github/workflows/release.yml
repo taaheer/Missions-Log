@@ -10,15 +10,32 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            host: windows
+            arch: win64_msvc2022_64
+            artifact: Output/MissionsLog-Installer.exe
+            artifact_name: MissionsLog-Installer.exe
+            
+          - os: macos-latest
+            host: mac
+            arch: ''
+            artifact: build/MissionsLog.dmg
+            artifact_name: MissionsLog-macOS.dmg
 
     steps:
     - name: Download the code
       uses: actions/checkout@v4
       with:
         submodules: recursive
-        
-    - name: Setup MSVC Developer Command Prompt
+
+    - name: Setup MSVC Developer Command Prompt (Windows)
+      if: matrix.os == 'windows-latest'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
@@ -27,9 +44,9 @@ jobs:
       uses: jurplel/install-qt-action@v3
       with:
         version: '6.10.*'
-        host: 'windows'
+        host: ${{ matrix.host }}
         target: 'desktop'
-        arch: 'win64_msvc2022_64'
+        arch: ${{ matrix.arch }}
         cache: true
 
     - name: Prepare the build files
@@ -38,15 +55,18 @@ jobs:
     - name: Build the application
       run: cmake --build build --config Release
 
-    - name: Stage files for Inno Setup
-      run: cmake --install build --config Release --prefix "${{ github.workspace }}/stage"
-
-    - name: Compile Inno Setup Script
+    - name: Compile Inno Setup (Windows)
+      if: matrix.os == 'windows-latest'
       run: iscc installer.iss
+
+    - name: Package App Bundle (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        macdeployqt build/MissionsLog.app -dmg
 
     - name: Publish to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
         name: "Missions Log ${{ github.ref_name }}"
-        files: Output/MissionsLog-Installer.exe
+        files: ${{ matrix.artifact }}

@@ -40,8 +40,8 @@ jobs:
       run: iscc installer.iss
 
     - name: Publish to GitHub Release
-          uses: softprops/action-gh-release@v2
-          with:
-            tag_name: build-${{ github.sha }}
-            name: "Missions Log Build (${{ github.sha }})"
-            files: Output/MissionsLog-Installer.exe
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: build-${{ github.sha }}
+        name: "Missions Log Build (${{ github.sha }})"
+        files: Output/MissionsLog-Installer.exe

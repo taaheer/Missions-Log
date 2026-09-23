@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*.*.*'
     branches:
-      - test-installer
+      - test-installers
 
 permissions:
   contents: write

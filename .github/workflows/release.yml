@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     strategy:
-      fail-fast: false # If one OS fails, let the others finish
+      fail-fast: false # Allows other OS builds to finish even if one fails
       matrix:
         include:
           - os: windows-latest
@@ -26,11 +26,9 @@ jobs:
           
           - os: macos-latest
             qt_host: mac
-            qt_arch: macos
+            qt_arch: clang_64 # Fixed architecture string
             artifact_path: MissionsLog-macOS.dmg
             
-          # We use Ubuntu 22.04 instead of 'latest' for Linux so the AppImage 
-          # uses an older glibc, making it compatible with more Linux distributions.
           - os: ubuntu-22.04 
             qt_host: linux
             qt_arch: gcc_64
@@ -41,8 +39,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
-
-    # --- 1. OS-Specific Setup ---
 
     - name: Setup MSVC Developer Command Prompt (Windows)
       if: runner.os == 'Windows'
@@ -56,8 +52,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev
 
-    # --- 2. Cross-Platform Qt Install ---
-
     - name: Install Qt 6.10
       uses: jurplel/install-qt-action@v3
       with:
@@ -66,8 +60,7 @@ jobs:
         target: 'desktop'
         arch: ${{ matrix.qt_arch }}
         cache: true
-
-    # --- 3. Cross-Platform Build ---
+        aqtversion: '==3.3.*' # Fixed: Forces newer parser for Qt 6.10 XML metadata
 
     - name: Prepare the build files
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
@@ -76,11 +69,8 @@ jobs:
       run: cmake --build build --config Release
 
     - name: Install and Deploy (CMake)
-      # Because your CMakeLists uses qt_generate_deploy_qml_app_script, 
-      # this command automatically bundles the Qt dependencies into the stage folder.
-      run: cmake --install build --config Release --prefix stage
-
-    # --- 4. OS-Specific Packaging ---
+      # Fixed: Uses github.workspace to provide the required absolute path
+      run: cmake --install build --config Release --prefix "${{ github.workspace }}/stage"
 
     - name: Package Windows (Inno Setup)
       if: runner.os == 'Windows'
@@ -89,7 +79,6 @@ jobs:
     - name: Package macOS (.dmg)
       if: runner.os == 'macOS'
       run: |
-        # CMake created the .app file. We use macdeployqt to wrap it into a DMG.
         macdeployqt stage/MissionsLog.app -dmg
         mv stage/MissionsLog.dmg MissionsLog-macOS.dmg
 
@@ -100,7 +89,6 @@ jobs:
         wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
         chmod +x linuxdeploy*.AppImage
         
-        # Grab the icon from your source code so Linux menus have a logo
         cp app.png stage/MissionsLog.png
         
         echo "[Desktop Entry]
@@ -110,10 +98,7 @@ jobs:
         Icon=MissionsLog
         Categories=Utility;" > stage/MissionsLog.desktop
 
-        # Generate the AppImage using the files CMake put into the 'stage' folder
         ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/MissionsLog --desktop-file stage/MissionsLog.desktop --icon-file stage/MissionsLog.png --plugin qt --output appimage
-
-    # --- 5. Upload to GitHub Releases ---
 
     - name: Publish to GitHub Release
       uses: softprops/action-gh-release@v2

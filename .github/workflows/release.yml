@@ -2,32 +2,39 @@ name: Build and Release Missions Log
 
 on:
   push:
+    tags:
+      - 'v*.*.*'
     branches:
-      - test-installers
+      - test-installer
 
 permissions:
-    contents: write
+  contents: write
 
 jobs:
   build:
-    name: Build for ${{ matrix.os }}
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     
     strategy:
+      fail-fast: false # If one OS fails, let the others finish
       matrix:
         include:
-
           - os: windows-latest
-            host: windows
-            arch: win64_msvc2022_64
-            artifact: Output/MissionsLog-Installer.exe
-            artifact_name: MissionsLog-Installer.exe
-            
+            qt_host: windows
+            qt_arch: win64_msvc2022_64
+            artifact_path: Output/MissionsLog-Installer.exe
+          
           - os: macos-latest
-            host: mac
-            arch: ''
-            artifact: build/MissionsLog.dmg
-            artifact_name: MissionsLog-macOS.dmg
+            qt_host: mac
+            qt_arch: macos
+            artifact_path: MissionsLog-macOS.dmg
+            
+          # We use Ubuntu 22.04 instead of 'latest' for Linux so the AppImage 
+          # uses an older glibc, making it compatible with more Linux distributions.
+          - os: ubuntu-22.04 
+            qt_host: linux
+            qt_arch: gcc_64
+            artifact_path: MissionsLog*.AppImage
 
     steps:
     - name: Download the code
@@ -35,20 +42,32 @@ jobs:
       with:
         submodules: recursive
 
+    # --- 1. OS-Specific Setup ---
+
     - name: Setup MSVC Developer Command Prompt (Windows)
-      if: matrix.os == 'windows-latest'
+      if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
+
+    - name: Install Linux Build Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev
+
+    # --- 2. Cross-Platform Qt Install ---
 
     - name: Install Qt 6.10
       uses: jurplel/install-qt-action@v3
       with:
         version: '6.10.*'
-        host: ${{ matrix.host }}
+        host: ${{ matrix.qt_host }}
         target: 'desktop'
-        arch: ${{ matrix.arch }}
+        arch: ${{ matrix.qt_arch }}
         cache: true
+
+    # --- 3. Cross-Platform Build ---
 
     - name: Prepare the build files
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
@@ -56,18 +75,49 @@ jobs:
     - name: Build the application
       run: cmake --build build --config Release
 
-    - name: Compile Inno Setup (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: Install and Deploy (CMake)
+      # Because your CMakeLists uses qt_generate_deploy_qml_app_script, 
+      # this command automatically bundles the Qt dependencies into the stage folder.
+      run: cmake --install build --config Release --prefix stage
+
+    # --- 4. OS-Specific Packaging ---
+
+    - name: Package Windows (Inno Setup)
+      if: runner.os == 'Windows'
       run: iscc installer.iss
 
-    - name: Package App Bundle (macOS)
-      if: matrix.os == 'macos-latest'
+    - name: Package macOS (.dmg)
+      if: runner.os == 'macOS'
       run: |
-        macdeployqt build/MissionsLog.app -dmg
+        # CMake created the .app file. We use macdeployqt to wrap it into a DMG.
+        macdeployqt stage/MissionsLog.app -dmg
+        mv stage/MissionsLog.dmg MissionsLog-macOS.dmg
+
+    - name: Package Linux (AppImage)
+      if: runner.os == 'Linux'
+      run: |
+        wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod +x linuxdeploy*.AppImage
+        
+        # Grab the icon from your source code so Linux menus have a logo
+        cp app.png stage/MissionsLog.png
+        
+        echo "[Desktop Entry]
+        Type=Application
+        Name=Missions Log
+        Exec=MissionsLog
+        Icon=MissionsLog
+        Categories=Utility;" > stage/MissionsLog.desktop
+
+        # Generate the AppImage using the files CMake put into the 'stage' folder
+        ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/MissionsLog --desktop-file stage/MissionsLog.desktop --icon-file stage/MissionsLog.png --plugin qt --output appimage
+
+    # --- 5. Upload to GitHub Releases ---
 
     - name: Publish to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
         name: "Missions Log ${{ github.ref_name }}"
-        files: ${{ matrix.artifact }}
+        files: ${{ matrix.artifact_path }}

@@ -50,7 +50,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev
+        sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev libxcb-cursor0
 
     - name: Install Qt 6.10
       uses: jurplel/install-qt-action@v3

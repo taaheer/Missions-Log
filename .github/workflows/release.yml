@@ -1,0 +1,118 @@
+name: Build and Release
+
+on:
+    push: 
+        tags: 
+            - 'v*'
+
+permissions:
+    contents: write
+
+jobs:
+  build:
+    name: Build on ${{matrix.os}}
+    runs-on: ${{matrix.os}}
+
+    env:
+        APP_VERSION: "0.0.0"
+
+    strategy:
+        fail-fast: false
+        matrix:
+            include:
+                - os: windows-latest
+                  qt_host: windows
+                  qt_arch: win64_msvc2022_64
+                  artifact_path: Qutput/MissionsLog-Installer.exe
+
+                - os: macos-latest
+                  qt_host: mac
+                  qt_arch: clang_64
+                  artifact_path: MissionsLog-macOS.dmg
+
+                - os: ubuntu-22.04
+                  qt_host: linux
+                  qt_arch: linux_gcc_64
+                  artifact_path: MissionsLog-x86_64.AppImage
+    
+    steps:
+        - name: Download the code
+          uses: actions/checkout@v4
+          with:
+            submodules: recursive
+
+        - name: Get Version
+          id: version
+          run: |
+            if [[ "$GITHUB_REF_NAME" == v* ]]; then
+            VERSION=${GITHUB_REF_NAME#v}
+            else
+            VERSION="0.0.0"
+            fi
+            echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          shell: bash
+
+        - name: Setup MSVC Developer Command Prompt (Windows)
+          if: runner.os == 'Windows'
+          uses: ilammy/msvc-dev-cmd@v1
+          with:
+            arch: x64
+
+        - name: Install Linux Build Dependencies
+          if: runner.os == 'Linux'
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev libxcb-cursor0
+
+        - name: Install Qt 6.10
+          uses: jurplel/install-qt-action@v3
+          with:
+            version: '6.10.*'
+            host: ${{ matrix.qt_host }}
+            target: 'desktop'
+            arch: ${{ matrix.qt_arch }}
+            cache: true
+        
+        - name: Prepare the build files
+          run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DAPP_VERSION=${{ env.APP_VERSION }}
+
+        - name: Build the application
+          run: cmake --build build --config Release
+
+        - name: Install and Deploy (CMake)
+          run: cmake --install build --config Release --prefix "${{ github.workspace }}/stage"
+
+        - name: Package Windows (Inno Setup)
+          if: runner.os == 'Windows'
+          run: iscc "/DMyAppVersion=${{ env.APP_VERSION }}" installer.iss
+
+        - name: Package macOS (.dmg)
+          if: runner.os == 'macOS'
+          run: |
+            macdeployqt stage/MissionsLog.app -dmg
+            mv stage/MissionsLog.dmg MissionsLog-macOS.dmg
+
+        - name: Package Linux (AppImage)
+          if: runner.os == 'Linux'
+          run: |
+            wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+            wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+            chmod +x linuxdeploy*.AppImage
+        
+            cp app.png stage/MissionsLog.png
+        
+            echo "[Desktop Entry]
+            Type=Application
+            Name=MissionsLog
+            Exec=MissionsLog
+            Icon=MissionsLog
+            Categories=Utility;" > stage/MissionsLog.desktop
+
+            ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/MissionsLog --desktop-file stage/MissionsLog.desktop --icon-file stage/MissionsLog.png --plugin qt --output appimage
+
+        - name: Publish to GitHub Release
+          uses: softprops/action-gh-release@v2
+          with:
+            tag_name: ${{ github.ref_name }}
+            name: "Missions Log ${{ github.ref_name }}"
+            files: ${{ matrix.artifact_path }}

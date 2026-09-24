@@ -4,6 +4,10 @@
 
 #include <QWKQuick/qwkquickglobal.h>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 int main(int argc, char *argv[])
 {
     QQuickWindow::setDefaultAlphaBuffer(true);
@@ -15,10 +19,22 @@ int main(int argc, char *argv[])
     app.setOrganizationName("Taaheer Labbe");
     app.setOrganizationDomain("taaheer.com");
     app.setApplicationName("Missions Log");
-    app.setApplicationVersion("0.1");
+    app.setApplicationVersion(APP_VERSION);
 
     app.setApplicationDisplayName("Missions Log");
     app.setDesktopFileName("com.taaheer.missionslog");
+
+#ifdef Q_OS_WIN
+    HANDLE hMutex = CreateMutexW(NULL, FALSE, L"MissionsLogMutex");
+    
+    if(GetLastError() == ERROR_ALREADY_EXISTS) 
+    {
+        if (hMutex) {
+            CloseHandle(hMutex);
+        }
+        return 0; 
+    }
+#endif
 
     QQmlApplicationEngine engine;
 

@@ -92,6 +92,10 @@ target_link_libraries(appMissionsLog
     QWindowKit::Quick
 )
 
+target_compile_definitions(appMissionsLog PRIVATE
+    APP_VERSION="${PROJECT_VERSION}"
+)
+
 install(TARGETS appMissionsLog
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

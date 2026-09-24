@@ -6,8 +6,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
-
 qt_standard_project_setup(REQUIRES 6.10)
+
+# --- FIX FOR LINUX DIRECTORY/EXECUTABLE COLLISION ---
+# Output executables to a 'bin' directory to prevent collisions with QML module directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# ----------------------------------------------------
 
 # Content of downloaded design from Figma to Qt or similar
 if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/importedcontent/CMakeLists.txt")
@@ -16,7 +20,6 @@ endif()
 
 set(QWINDOWKIT_BUILD_WIDGETS OFF CACHE BOOL "" FORCE)
 set(QWINDOWKIT_BUILD_QUICK ON CACHE BOOL "" FORCE)
-
 if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/external/qwindowkit/CMakeLists.txt")
     add_subdirectory(external/qwindowkit)
 endif()
@@ -27,7 +30,6 @@ if(APPLE)
 elseif(WIN32)
     list(APPEND APP_ICONS "${CMAKE_CURRENT_SOURCE_DIR}/app.rc")
 endif()
-
 
 qt_add_executable(appMissionsLog
     main.cpp
@@ -40,7 +42,6 @@ set_source_files_properties(Theme.qml PROPERTIES
 
 qt_add_qml_module(appMissionsLog
     URI MissionsLog
-
     QML_FILES
     Main.qml
     Theme.qml
@@ -60,19 +61,15 @@ qt_add_qml_module(appMissionsLog
     CustomMenu.qml
     CustomMenuItem.qml
     CustomDialog.qml
-
     SOURCES
     missionmanager.h missionmanager.cpp
     missionmodel.h missionmodel.cpp
     missionfilter.h missionfilter.cpp
     mission.h
-
     RESOURCES
     missions.json
     app.png
 )
-
-
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

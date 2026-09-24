@@ -60,7 +60,6 @@ jobs:
         target: 'desktop'
         arch: ${{ matrix.qt_arch }}
         cache: true
-        aqtversion: '==3.3.*' # Fixed: Forces newer parser for Qt 6.10 XML metadata
 
     - name: Prepare the build files
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release

@@ -1,5 +1,9 @@
 #define MyAppName "Missions Log"
-#define MyAppVersion "1.0.1"
+
+#ifndef MyAppVersion
+#define MyAppVersion "1.0.0"
+#endif
+
 #define MyAppPublisher "Taaheer Labbe"
 #define MyAppURL "https://github.com/taaheer/Missions-Log"
 #define MyAppExeName "MissionsLog.exe"

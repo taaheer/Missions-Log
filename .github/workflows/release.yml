@@ -14,6 +14,9 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
+    env:
+      APP_VERSION: "0.0.0"
     
     strategy:
       fail-fast: false # Allows other OS builds to finish even if one fails
@@ -40,6 +43,13 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Get Version
+      id: version
+      run: |
+        VERSION=${GITHUB_REF_NAME#v}
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+      shell: bash
+
     - name: Setup MSVC Developer Command Prompt (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -62,7 +72,7 @@ jobs:
         cache: true
 
     - name: Prepare the build files
-      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DAPP_VERSION=${{ env.APP_VERSION }}
 
     - name: Build the application
       run: cmake --build build --config Release
@@ -73,7 +83,7 @@ jobs:
 
     - name: Package Windows (Inno Setup)
       if: runner.os == 'Windows'
-      run: iscc installer.iss
+      run: iscc "/DMyAppVersion=${{ env.APP_VERSION }}" installer.iss
 
     - name: Package macOS (.dmg)
       if: runner.os == 'macOS'
@@ -92,7 +102,7 @@ jobs:
         
         echo "[Desktop Entry]
         Type=Application
-        Name=Missions Log
+        Name=MissionsLog
         Exec=MissionsLog
         Icon=MissionsLog
         Categories=Utility;" > stage/MissionsLog.desktop

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(MissionsLog VERSION 0.1 LANGUAGES CXX)
+if(NOT DEFINED APP_VERSION)
+    set(APP_VERSION "1.0.0")
+endif()
+
+project(MissionsLog VERSION ${APP_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -46,7 +46,11 @@ jobs:
     - name: Get Version
       id: version
       run: |
-        VERSION=${GITHUB_REF_NAME#v}
+        if [[ "$GITHUB_REF_NAME" == v* ]]; then
+          VERSION=${GITHUB_REF_NAME#v}
+        else
+          VERSION="0.0.0"
+        fi
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
       shell: bash
 

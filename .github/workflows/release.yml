@@ -31,7 +31,7 @@ jobs:
             
           - os: ubuntu-22.04 
             qt_host: linux
-            qt_arch: gcc_64
+            qt_arch: linux_gcc_64
             artifact_path: MissionsLog*.AppImage
 
     steps:

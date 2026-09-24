@@ -23,7 +23,7 @@ jobs:
                 - os: windows-latest
                   qt_host: windows
                   qt_arch: win64_msvc2022_64
-                  artifact_path: Qutput/MissionsLog-Installer.exe
+                  artifact_path: Output/MissionsLog-Installer.exe
 
                 - os: macos-latest
                   qt_host: mac

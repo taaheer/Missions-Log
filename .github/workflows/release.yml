@@ -137,8 +137,8 @@ jobs:
         - name: Package macOS (.dmg)
           if: runner.os == 'macOS'
           run: |
-            macdeployqt stage/MissionsLog.app -dmg
-            mv stage/MissionsLog.dmg MissionsLog-macOS.dmg
+            macdeployqt stage/Missions-Log.app -dmg
+            mv stage/Missions-Log.dmg Missions-Log-macOS.dmg
 
         - name: Package Linux (AppImage)
           if: matrix.os == 'ubuntu-22.04'
@@ -147,16 +147,16 @@ jobs:
             wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
             chmod +x linuxdeploy*.AppImage
         
-            cp app.png stage/MissionsLog.png
+            cp app.png stage/Missions-Log.png
         
             echo "[Desktop Entry]
             Type=Application
-            Name=MissionsLog
-            Exec=MissionsLog
-            Icon=MissionsLog
-            Categories=Utility;" > stage/MissionsLog.desktop
+            Name=Missions-Log
+            Exec=Missions-Log
+            Icon=Missions-Log
+            Categories=Utility;" > stage/Missions-Log.desktop
 
-            ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/MissionsLog --desktop-file stage/MissionsLog.desktop --icon-file stage/MissionsLog.png --plugin qt --output appimage
+            ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/Missions-Log --desktop-file stage/Missions-Log.desktop --icon-file stage/Missions-Log.png --plugin qt --output appimage
           
         - name: Set Release Asset Path (Desktop)
           if: matrix.qt_target != 'android'

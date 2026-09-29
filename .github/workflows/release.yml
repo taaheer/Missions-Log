@@ -23,21 +23,27 @@ jobs:
                 - os: windows-latest
                   qt_host: windows
                   qt_arch: win64_msvc2022_64
-                  artifact_path: Output/MissionsLog-Installer.exe
+                  artifact_path: Output/Missions-Log-Installer.exe
 
                 - os: macos-latest
                   qt_host: mac
                   qt_arch: clang_64
-                  artifact_path: MissionsLog-macOS.dmg
+                  artifact_path: Missions-Log-macOS.dmg
 
                 - os: ubuntu-22.04
                   qt_host: linux
                   qt_arch: linux_gcc_64
-                  artifact_path: MissionsLog-x86_64.AppImage
+                  artifact_path: Missions-Log-x86_64.AppImage
+
+                - os: ubuntu-latest
+                  qt_host: all_os
+                  qt_target: android
+                  qt_arch: android_arm64_v8a
+                  qt_version: '6.11.*'
     
     steps:
         - name: Download the code
-          uses: actions/checkout@v4
+          uses: actions/checkout@v7
           with:
             submodules: recursive
 
@@ -58,29 +64,71 @@ jobs:
           with:
             arch: x64
 
-        - name: Install Linux Build Dependencies
-          if: runner.os == 'Linux'
+        - name: Install Linux Build Dependencies (Linux)
+          if: matrix.os == 'ubuntu-22.04'
           run: |
             sudo apt-get update
             sudo apt-get install -y libgl1-mesa-dev libxkbcommon-x11-dev libvulkan-dev libxcb-xinerama0-dev libxcb-cursor0
 
-        - name: Install Qt 6.10
-          uses: jurplel/install-qt-action@v3
+        - name: Setup Java (Android)
+          if: matrix.qt_target == 'android'
+          uses: actions/setup-java@v6
           with:
-            version: '6.10.*'
+            distribution: 'temurin'
+            java-version: '17'
+
+        - name: Setup Android SDK (Android)
+          if: matrix.qt_target == 'android'
+          uses: android-actions/setup-android@v4
+
+        - name: Install Qt 6.11
+          uses: jurplel/install-qt-action@v4
+          with:
+            version: '6.11.*'
             host: ${{ matrix.qt_host }}
-            target: 'desktop'
+            target: ${{ matrix.qt_target || 'desktop' }}
             arch: ${{ matrix.qt_arch }}
             cache: true
+            aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@refs/pull/1000/head'
         
-        - name: Prepare the build files
+        - name: Prepare the build files (Desktop)
+          if: matrix.qt_target != 'android'
           run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DAPP_VERSION=${{ env.APP_VERSION }}
 
-        - name: Build the application
+        - name: Build the application (Desktop)
+          if: matrix.qt_target != 'android'
           run: cmake --build build --config Release
 
-        - name: Install and Deploy (CMake)
+        - name: Install and Deploy (Desktop)
+          if: matrix.qt_target != 'android'
           run: cmake --install build --config Release --prefix "${{ github.workspace }}/stage"
+
+        - name: Prepare build files (Android)
+          if: matrix.qt_target == 'android'
+          run: qt-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DAPP_VERSION=${{ env.APP_VERSION }} -DANDROID_ABI=arm64-v8a -DQT_ANDROID_SIGN_APK=ON
+
+        - name: Update Gradle Wrapper (Android)
+          if: matrix.qt_target == 'android'
+          run: |
+            mkdir -p build/android-build/gradle/wrapper
+            echo "distributionBase=GRADLE_USER_HOME" > build/android-build/gradle/wrapper/gradle-wrapper.properties
+            echo "distributionPath=wrapper/dists" >> build/android-build/gradle/wrapper/gradle-wrapper.properties
+            echo "distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip" >> build/android-build/gradle/wrapper/gradle-wrapper.properties
+            echo "zipStoreBase=GRADLE_USER_HOME" >> build/android-build/gradle/wrapper/gradle-wrapper.properties
+            echo "zipStorePath=wrapper/dists" >> build/android-build/gradle/wrapper/gradle-wrapper.properties
+
+        - name: Decode Keystore (Android)
+          if: matrix.qt_target == 'android'
+          run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > android.keystore
+
+        - name: Build and Sign the APK (Android)
+          if: matrix.qt_target == 'android'
+          env:
+            QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+            QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.KEY_ALIAS }}
+            QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+            QT_ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          run: cmake --build build --config Release --target apk
 
         - name: Package Windows (Inno Setup)
           if: runner.os == 'Windows'
@@ -93,7 +141,7 @@ jobs:
             mv stage/MissionsLog.dmg MissionsLog-macOS.dmg
 
         - name: Package Linux (AppImage)
-          if: runner.os == 'Linux'
+          if: matrix.os == 'ubuntu-22.04'
           run: |
             wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
             wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
@@ -109,10 +157,20 @@ jobs:
             Categories=Utility;" > stage/MissionsLog.desktop
 
             ./linuxdeploy-x86_64.AppImage --appdir stage --executable stage/bin/MissionsLog --desktop-file stage/MissionsLog.desktop --icon-file stage/MissionsLog.png --plugin qt --output appimage
+          
+        - name: Set Release Asset Path (Desktop)
+          if: matrix.qt_target != 'android'
+          shell: bash
+          run: echo "RELEASE_FILE=${{ matrix.artifact_path }}" >> $GITHUB_ENV
+
+        - name: Set Release Asset Path (Android)
+          if: matrix.qt_target == 'android'
+          shell: bash
+          run: echo "RELEASE_FILE=$(find build/android-build/build/outputs/apk -name '*signed.apk' | head -n 1)" >> $GITHUB_ENV
 
         - name: Publish to GitHub Release
-          uses: softprops/action-gh-release@v2
+          uses: softprops/action-gh-release@v3
           with:
             tag_name: ${{ github.ref_name }}
             name: "Missions Log ${{ github.ref_name }}"
-            files: ${{ matrix.artifact_path }}
+            files: ${{ env.RELEASE_FILE }}

@@ -92,7 +92,7 @@ qt_add_qml_module(appMissionsLog
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 set_target_properties(appMissionsLog PROPERTIES
-    OUTPUT_NAME "MissionsLog"
+    OUTPUT_NAME "Missions-Log"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.taaheer.missionslog
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -100,6 +100,7 @@ set_target_properties(appMissionsLog PROPERTIES
     MACOSX_BUNDLE_ICON_FILE app.icns
     WIN32_EXECUTABLE TRUE
     QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
+    QT_ANDROID_PACKAGE_NAME "com.taaheer.missionslog"
 )
 
 target_link_libraries(appMissionsLog

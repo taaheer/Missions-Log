@@ -6,7 +6,7 @@
 
 #define MyAppPublisher "Taaheer Labbe"
 #define MyAppURL "https://github.com/taaheer/Missions-Log"
-#define MyAppExeName "MissionsLog.exe"
+#define MyAppExeName "Missions-Log.exe"
 
 #define MyAppExePath "bin\" + MyAppExeName
 
@@ -28,7 +28,7 @@ DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 
 OutputDir=Output
-OutputBaseFilename=MissionsLog-Installer
+OutputBaseFilename=Missions-Log-Installer
 
 PrivilegesRequiredOverridesAllowed=commandline
 SetupIconFile=app.ico

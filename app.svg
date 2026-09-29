@@ -1,0 +1,35 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 400 480"
+    id="vector">
+    <g
+        id="upper_arrow"
+        transform="translate(0 -20)">
+        <path
+            id="path"
+            d="M 120 83 L 280 83 L 200 163 Z"
+            fill="#795b0d"
+            stroke-width="1"/>
+    </g>
+    <g id="group">
+        <path
+            id="path_1"
+            d="M 277.782 119.792 L 320.208 162.218 L 122.218 360.208 L 79.792 317.782 Z"
+            fill="#f3b71b"
+            stroke-width="1"/>
+        <path
+            id="path_2"
+            d="M 122.218 119.792 L 320.208 317.782 L 277.782 360.208 L 79.792 162.218 Z"
+            fill="#f3b71b"
+            stroke-width="1"/>
+    </g>
+    <g
+        id="lower_arrow"
+        transform="translate(0 20)">
+        <path
+            id="path_3"
+            d="M 120 397 L 280 397 L 200 317 Z"
+            fill="#795b0d"
+            stroke-width="1"/>
+    </g>
+</svg>

@@ -8,7 +8,7 @@ Menu {
     required property color strokeColor
 
     contentItem: ListView {
-        implicitWidth: 200
+        implicitWidth: 260
         implicitHeight: contentHeight + 12
         model: control.contentModel
 
@@ -29,7 +29,7 @@ Menu {
 
     background: HexagonPanel {
         mirrored: true
-        cutLength: 20
+        cutLength: Theme.cutM
         strokeColor: control.strokeColor
     }
 }

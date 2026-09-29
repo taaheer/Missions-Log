@@ -5,12 +5,12 @@ import QtQuick.Shapes
 Item {
     id: root
 
-    property color fillColor: Qt.alpha(Theme.secondaryColor, 0.8)
-    property color strokeColor: Theme.primaryColor
+    property color fillColor: Qt.alpha(Theme.colorSecondary, 0.8)
+    property color strokeColor: Theme.colorPrimary
     property int strokeWidth: strokeColor === Theme.transparent ? 0 : 3
     property bool mirrored: false
 
-    property int cutLength: 30
+    property int cutLength: Theme.cutXL
 
     readonly property real cutSize: Math.min(cutLength, width / 2, height / 2)
 

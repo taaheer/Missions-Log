@@ -9,7 +9,7 @@ Text{
     property int interval: 125
 
     font.pointSize: 5
-    color: Theme.primaryColor
+    color: Theme.colorPrimary
     text: displayText
 
     onFinalTextChanged: {

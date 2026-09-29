@@ -14,7 +14,7 @@ Button {
         verticalAlignment: Text.AlignVCenter
         font{
             bold: true
-            pointSize: 32
+            pointSize: Theme.fontSizeL
         }
     }
 }

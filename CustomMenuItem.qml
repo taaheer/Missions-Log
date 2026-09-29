@@ -5,7 +5,7 @@ import QtQuick.Controls
 MenuItem {
     id: control
 
-    property color fillColor: control.hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.8)
+    property color fillColor: control.hovered ? Theme.colorPrimary : Qt.alpha(Theme.colorSecondary, 0.8)
 
     hoverEnabled: true
 
@@ -13,15 +13,19 @@ MenuItem {
 
 
     contentItem: Text {
+        id: option
         text: control.text
-        font.pointSize: 12
-        color: control.hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
+        font{
+            pointSize: Theme.fontSizeXS
+            family: Theme.fontFamilySubTitle
+        }
+        color: control.hovered ? Theme.textColorTertiary : Theme.textColorPrimary
         verticalAlignment: Text.AlignVCenter
     }
 
     background: HexagonPanel {
         mirrored: true
-        cutLength: 15
+        cutLength: Theme.cutS
         fillColor: control.fillColor
         strokeColor: Theme.transparent
     }

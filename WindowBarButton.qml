@@ -11,7 +11,7 @@ Button {
     contentItem: Text {
         text: control.text
         font: control.font
-        color: control.down ? Theme.primaryTextColor :  Theme.primaryColor
+        color: control.down ? Theme.textColorPrimary :  Theme.colorPrimary
 
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -28,7 +28,7 @@ Button {
 
         layer.effect: MultiEffect{
             shadowEnabled: true
-            shadowColor: Theme.primaryColor
+            shadowColor: Theme.colorPrimary
             shadowBlur: control.down ? 1.0 : (control.hovered ? 0.5 : 0.0)
             Behavior on shadowBlur {
                 NumberAnimation{

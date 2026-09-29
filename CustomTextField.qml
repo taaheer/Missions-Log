@@ -7,7 +7,7 @@ TextField {
 
     property color strokeColor
     property bool mirrored: false
-    property int cutLength: 30
+    property int cutLength: Theme.cutXL
 
     placeholderTextColor: Qt.darker(color, 2)
 

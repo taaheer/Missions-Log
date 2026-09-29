@@ -9,7 +9,7 @@ HexagonPanel{
     signal editMissionRequested()
 
     property var currentMission: MissionManager.currentMission
-    property color currentColor: currentMission.category === "side" ?  Theme.altPrimaryColor : Theme.primaryColor
+    property color currentColor: currentMission.category === "side" ?  Theme.colorPrimaryAlt : Theme.colorPrimary
 
     strokeColor: currentColor
 
@@ -64,7 +64,7 @@ HexagonPanel{
             fill: parent
             margins: 6
         }
-        cutLength: 25
+        cutLength: Theme.cutL
 
         ColumnLayout{
             anchors{
@@ -79,10 +79,10 @@ HexagonPanel{
 
                 Layout.fillWidth: true
                 Layout.preferredHeight: title.implicitHeight + 2
-                fillColor: Theme.primaryAccent
+                fillColor: Theme.accentPrimary
                 strokeColor: Theme.transparent
                 Layout.bottomMargin: 2
-                cutLength: 20
+                cutLength: Theme.cutM
 
                 ColumnLayout{
                     anchors{
@@ -94,18 +94,19 @@ HexagonPanel{
 
                     RowLayout{
                         Layout.fillWidth: true
-                        Layout.topMargin: 2
+                        Layout.topMargin:  Device.isMobile ? 4 : 2
 
                         AnimatedBullets{
-                            spacing: -18
-                            pointSize: 14
+                            spacing: Device.isMobile ? -15 : -18
+                            pointSize: Theme.fontSizeS
                             setDarkEven: false
                             Layout.topMargin: -4
                             Layout.alignment: Qt.AlignTop
-                            color: Qt.lighter(Theme.primaryAccent, 2)
+                            color: Qt.lighter(Theme.accentPrimary, 2)
 
                             TapHandler {
                                 onTapped: missionMenu.popup()
+                                margin: 15
                             }
 
                             HoverHandler {
@@ -117,12 +118,12 @@ HexagonPanel{
                                 strokeColor: root.currentColor
                                 CustomMenuItem {
                                     text: qsTr("Edit Mission")
-                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.secondaryColor, 0.8)
+                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.colorSecondary, 0.8)
                                     onTriggered: root.editMissionRequested()
                                 }
                                 CustomMenuItem {
                                     text: root.currentMission?.isCompleted ? qsTr("Reopen Mission") : qsTr("Finish Mission (Failed)")
-                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.secondaryColor, 0.8)
+                                    fillColor: hovered ? root.currentColor : Qt.alpha(Theme.colorSecondary, 0.8)
                                     onTriggered: MissionManager.toggleMissionStatus(MissionManager.currentIndex);
                                 }
                             }
@@ -131,7 +132,7 @@ HexagonPanel{
                         Text{
                             id: title
                             text: root.currentMission?.title ?? ""
-                            font.pointSize: 18
+                            font.pointSize: Theme.fontSizeL
                             wrapMode: Text.WordWrap
                             color: root.currentColor
                             Layout.fillWidth: true
@@ -182,13 +183,13 @@ HexagonPanel{
                             left: parent.left
                             top: parent.top
                             topMargin: 11
-                            leftMargin: 25
+                            leftMargin: Device.isMobile ? 23 : 25
                         }
 
                         text: sectionDelegate.section
                         color: root.currentColor
                         font{
-                            pointSize: 16
+                            pointSize: Theme.fontSizeM
                             capitalization: Font.AllUppercase
                         }
                     }
@@ -208,7 +209,7 @@ HexagonPanel{
                         Layout.fillWidth: true
                         Layout.preferredHeight: taskTitle.implicitHeight + 4
                         Layout.topMargin: 7
-                        fillColor: Theme.primaryAccent
+                        fillColor: Theme.accentPrimary
                         strokeColor: Theme.transparent
                         cutLength: 16
 
@@ -225,9 +226,10 @@ HexagonPanel{
                                 text: delegate.modelData.isCompleted ? "✓" : "▶"
 
                                 color: root.currentColor;
-                                font.pointSize: delegate.modelData.isCompleted ? 20 : 30
-                                Layout.leftMargin: delegate.modelData.isCompleted ? 10 : 2
+                                font.pointSize: delegate.modelData.isCompleted ? (Device.isMobile ? 30 : 20) : (Device.isMobile ? 20 : 30)
+                                Layout.leftMargin: delegate.modelData.isCompleted ? (Device.isMobile ? 2 : 10) : (Device.isMobile ? 0 : 2)
                                 Layout.bottomMargin: 2
+                                Layout.topMargin: Device.isMobile ? 2 : 0
 
                                 TapHandler {
                                     onTapped: {
@@ -253,12 +255,12 @@ HexagonPanel{
                             Text{
                                 id: taskTitle
                                 text: delegate.modelData.name
-                                color: Theme.primaryTextColor
+                                color: Theme.textColorPrimary
 
-                                Layout.leftMargin: delegate.modelData.isCompleted ? -3 : 3
+                                Layout.leftMargin: delegate.modelData.isCompleted ? (Device.isMobile ? 2 : -3) : 3
 
                                 font{
-                                    pointSize: 16
+                                    pointSize: Theme.fontSizeM
                                     capitalization: Font.AllUppercase
                                 }
                             }
@@ -275,7 +277,8 @@ HexagonPanel{
                         Layout.bottomMargin: 11
                         lineHeight: 0.85
                         font{
-                            pointSize: 14
+                            pointSize: Theme.fontSizeS
+                            family: Theme.fontFamilyParagraph
                         }
                     }
                 }

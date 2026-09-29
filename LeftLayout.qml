@@ -6,10 +6,11 @@ import QtQuick.Controls
 import MissionsLog
 
 HexagonPanel {
+    id: root
 
     HexagonPanel{
         mirrored: true
-        cutLength: 25
+        cutLength: Theme.cutL
 
 
         strokeColor: Theme.transparent
@@ -67,17 +68,18 @@ HexagonPanel {
 
                         required property string section 
 
-                        property color categoryColor: section == "main" ? Theme.primaryColor : Theme.altPrimaryColor
+                        property color categoryColor: section == "main" ? Theme.colorPrimary : Theme.colorPrimaryAlt
 
                         AnimatedBullets{
-                            Layout.topMargin: 5
-                            spacing: -18
+                            Layout.topMargin: Device.isMobile ? 3 : 5
+                            spacing: Device.isMobile ? -15 : -18
                             Layout.alignment: Qt.AlignVCenter
-                            pointSize: 16
+                            pointSize: Theme.fontSizeM
                             color: missionHeader.categoryColor
 
                             TapHandler {
                                 onTapped: menu.popup()
+                                margin: 15
                             }
 
                             HoverHandler {
@@ -86,6 +88,7 @@ HexagonPanel {
 
                             CustomMenu {
                                 id: menu
+                                strokeColor: missionHeader.categoryColor
                                 CustomMenuItem {
                                     text: qsTr("Reset Everything")
                                     onTriggered: confirmResetDialog.open()
@@ -98,10 +101,13 @@ HexagonPanel {
                                 standardButtons: Dialog.Yes | Dialog.No
 
                                 Text {
-                                    width: 320
+                                    width: root.width
                                     text: qsTr("Are you sure you want to reset all missions? All unsaved progress will be lost.")
-                                    color: Theme.primaryTextColor
-                                    font.pointSize: 12
+                                    color: Theme.textColorPrimary
+                                    font{
+                                        pointSize: Theme.fontSizeXS
+                                        family: Theme.fontFamilyParagraph
+                                    }
                                     wrapMode: Text.WordWrap
                                 }
 
@@ -112,13 +118,15 @@ HexagonPanel {
                         }
 
                         ColumnLayout{
-                            spacing: -5
+                            spacing: Device.isMobile ? -1 : -5
                             Layout.topMargin: 5
+                            Layout.bottomMargin: Device.isMobile ? 3 : 0
                             Text{
                                 id: sectionText
                                 Layout.topMargin: 3
+                                Layout.bottomMargin: -3
                                 font{
-                                    pointSize: 18
+                                    pointSize: Theme.fontSizeL
                                     capitalization: Font.AllUppercase
                                 }
                                 color: missionHeader.categoryColor
@@ -132,8 +140,8 @@ HexagonPanel {
 
                                     Text {
                                         text: "◥"
-                                        color: Theme.altPrimaryColor
-                                        font.pointSize: 5
+                                        color: Theme.colorPrimaryAlt
+                                        font.pointSize: Device.isMobile ? 4 : 5
                                         font.weight: Font.Black
                                         opacity: Math.random() * 1.0 + 0.0
                                     }
@@ -147,8 +155,8 @@ HexagonPanel {
 
                                     Text {
                                         text: "◥"
-                                        color: Theme.altPrimaryColor
-                                        font.pointSize: 5
+                                        color: Theme.colorPrimaryAlt
+                                        font.pointSize: Device.isMobile ? 4 : 5
                                         font.weight: Font.Black
                                         opacity: Math.random() * 1.0 + 0.0
                                     }
@@ -166,7 +174,7 @@ HexagonPanel {
                         width: ListView.view.width
                         Layout.fillWidth: true
 
-                        property color containerColor: model.category === "main" ? Theme.primaryColor : Theme.altPrimaryColor
+                        property color containerColor: model.category === "main" ? Theme.colorPrimary : Theme.colorPrimaryAlt
                         property bool isSelected: missionList.currentIndex === index
 
                         Item{
@@ -200,11 +208,11 @@ HexagonPanel {
                                             margins: 6
                                         }
 
-                                        cutLength: 25
+                                        cutLength: Theme.cutL
 
                                         mirrored: true
 
-                                        fillColor: Theme.primaryAccent
+                                        fillColor: Theme.accentPrimary
                                         strokeColor: Theme.transparent
 
                                         Text{
@@ -253,7 +261,7 @@ HexagonPanel {
 
                                             fillColor: MissionManager.viewStatus === "finished"
                                                        ? (delegate.model.isSuccess ? delegate.containerColor : "red")
-                                                       : (delegate.model.isActive ? delegate.containerColor : Theme.secondaryColor)
+                                                       : (delegate.model.isActive ? delegate.containerColor : Theme.colorSecondary)
                                             strokeColor: Theme.transparent
 
                                             height: 18
@@ -264,7 +272,7 @@ HexagonPanel {
                                                 anchors.centerIn: parent
 
                                                 font{
-                                                    pointSize: 13
+                                                    pointSize: Theme.fontSizeXS
                                                     capitalization: Font.AllUppercase
                                                 }
 
@@ -273,8 +281,8 @@ HexagonPanel {
                                                       : (delegate.model.isActive ? "ACTIVE" : "INACTIVE")
 
                                                 color: MissionManager.viewStatus === "finished"
-                                                       ? (delegate.model.isSuccess ? Theme.secondaryColor : Theme.primaryTextColor)
-                                                       : (delegate.model.isActive ? Theme.secondaryColor : Theme.primaryTextColor)
+                                                       ? (delegate.model.isSuccess ? Theme.colorSecondary : Theme.textColorPrimary)
+                                                       : (delegate.model.isActive ? Theme.colorSecondary : Theme.textColorPrimary)
                                             }
                                         }
 
@@ -288,13 +296,15 @@ HexagonPanel {
                                                 topMargin: 1
                                             }
 
-                                            font.pointSize: 16
+                                            font{
+                                                pointSize: Theme.fontSizeM
+                                            }
 
                                             lineHeight: 0.8
 
                                             text: delegate.model.title
                                             wrapMode: Text.WordWrap
-                                            color: Theme.primaryTextColor
+                                            color: Theme.textColorPrimary
                                         }
 
                                         HexagonPanel{
@@ -309,11 +319,13 @@ HexagonPanel {
 
                                             mirrored: true
                                             strokeColor: delegate.containerColor
-                                            fillColor: Theme.secondaryColor
+                                            fillColor: Theme.colorSecondary
 
                                             height: 25
                                             width: activeButton.implicitWidth + 66
                                             opacity: delegate.isSelected ? 1.0 : 0.0
+
+                                            enabled: delegate.isSelected
 
                                             Text{
                                                 id: activeButton
@@ -321,15 +333,16 @@ HexagonPanel {
                                                 anchors.centerIn: parent
 
                                                 font{
-                                                    pointSize: 12
+                                                    pointSize: Theme.fontSizeXS
                                                     capitalization: Font.AllUppercase
-
                                                 }
                                                 color: delegate.containerColor
                                                 text: delegate.model.isActive ? qsTr("Inactive") : qsTr("Active")
                                             }
 
                                             TapHandler {
+                                                gesturePolicy: TapHandler.ReleaseWithinBounds
+                                                margin: 15
                                                 onTapped: MissionManager.toggleMissionActive(delegate.index)
                                             }
                                         }
@@ -372,16 +385,17 @@ HexagonPanel {
                 }
                 ColumnLayout {
                     anchors.centerIn: parent
-                    visible: MissionManager.currentIndex < 0
+                    visible: missionList.count === 0
                     spacing: 12
 
                     Text {
-                        text: qsTr("NO CURRENT MISSION")
-                        color: Theme.primaryColor
+                        text: qsTr("NO MISSION")
+                        color: Theme.colorPrimary
                         font {
-                            pointSize: 16
+                            pointSize: Theme.fontSizeM
                             bold: true
                             letterSpacing: 2
+                            family: Theme.fontFamilyTitle
                         }
                         Layout.alignment: Qt.AlignHCenter
                     }

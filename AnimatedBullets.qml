@@ -5,8 +5,8 @@ import QtQuick.Layouts
 ColumnLayout{
     id: control
 
-    property int pointSize: 12
-    property color color: Theme.primaryColor
+    property int pointSize: Theme.fontSizeXS
+    property color color: Theme.colorPrimary
     property bool setDarkEven: true
 
     Repeater{
@@ -21,7 +21,9 @@ ColumnLayout{
 
             text: "•"
             color: darkEven ? Qt.darker(control.color, 2) : control.color
-            font.pointSize: control.pointSize
+            font{
+                pointSize: control.pointSize
+            }
             opacity: 0
 
             SequentialAnimation{

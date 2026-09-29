@@ -21,8 +21,11 @@ endif()
 set(QWINDOWKIT_BUILD_WIDGETS OFF CACHE BOOL "" FORCE)
 set(QWINDOWKIT_BUILD_QUICK ON CACHE BOOL "" FORCE)
 
-if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/external/qwindowkit/CMakeLists.txt")
-    add_subdirectory(external/qwindowkit)
+
+if (NOT ANDROID AND NOT IOS)
+    if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/external/qwindowkit/CMakeLists.txt")
+        add_subdirectory(external/qwindowkit)
+    endif()
 endif()
 
 set(APP_ICONS "")
@@ -38,9 +41,12 @@ qt_add_executable(appMissionsLog
     ${APP_ICONS}
 )
 
-set_source_files_properties(Theme.qml PROPERTIES
-    QT_QML_SINGLETON_TYPE TRUE
+set_source_files_properties(
+    Theme.qml
+    Device.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
+
 
 qt_add_qml_module(appMissionsLog
     URI MissionsLog
@@ -64,6 +70,7 @@ qt_add_qml_module(appMissionsLog
     CustomMenu.qml
     CustomMenuItem.qml
     CustomDialog.qml
+    Device.qml
 
     SOURCES
     missionmanager.h missionmanager.cpp
@@ -74,6 +81,9 @@ qt_add_qml_module(appMissionsLog
     RESOURCES
     missions.json
     app.png
+    RESOURCES fonts/Exo2-Regular.ttf fonts/Michroma-Regular.ttf fonts/NotoSansMath-Regular.ttf fonts/Orbitron-Regular.ttf
+    SOURCES
+
 )
 
 
@@ -89,13 +99,17 @@ set_target_properties(appMissionsLog PROPERTIES
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_ICON_FILE app.icns
     WIN32_EXECUTABLE TRUE
+    QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android"
 )
 
 target_link_libraries(appMissionsLog
     PRIVATE
     Qt6::Quick
-    QWindowKit::Quick
 )
+
+if (NOT ANDROID AND NOT IOS)
+    target_link_libraries(appMissionsLog PRIVATE QWindowKit::Quick)
+endif()
 
 target_compile_definitions(appMissionsLog PRIVATE
     APP_VERSION="${PROJECT_VERSION}"

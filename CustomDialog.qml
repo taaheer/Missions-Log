@@ -21,25 +21,26 @@ Dialog {
                 topMargin: 15
             }
             text: control.title
-            color: Theme.primaryColor
+            color: Theme.colorPrimary
             font {
-                pointSize: 14
+                pointSize: Theme.fontSizeS
                 bold: true
                 letterSpacing: 2
                 capitalization: Font.AllUppercase
+                family: Theme.fontFamilyTitle
             }
         }
     }
 
     background: HexagonPanel {
         fillColor: Theme.transparent
-        cutLength: 20
+        cutLength: Theme.cutM
         mirrored: true
 
         HexagonPanel{
             strokeColor: Theme.transparent
-            fillColor: Theme.secondaryColor
-            cutLength: 20
+            fillColor: Theme.colorSecondary
+            cutLength: Theme.cutM
             mirrored: true
 
             anchors{
@@ -56,14 +57,14 @@ Dialog {
         spacing: 150
 
         delegate: CustomButton {
-            fillColor: hovered ? Theme.primaryColor : Theme.transparent
-            color: hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
+            fillColor: hovered ? Theme.colorPrimary : Theme.transparent
+            color: hovered ? Theme.textColorTertiary : Theme.textColorPrimary
             implicitWidth: 100
             strokeWidth: 3
         }
     }
 
     Overlay.modal: Rectangle{
-        color: Qt.alpha(Theme.primaryColor, 0.1)
+        color: Qt.alpha(Theme.colorPrimary, 0.1)
     }
 }

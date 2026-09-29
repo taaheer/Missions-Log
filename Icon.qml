@@ -18,7 +18,7 @@ Item {
         Text {
             text: "⏷"
             font.pointSize: 20
-            color: Qt.darker(Theme.primaryColor, 2)
+            color: Qt.darker(Theme.colorPrimary, 2)
             anchors.horizontalCenter: centerCross.horizontalCenter
             anchors.top: centerCross.top
             anchors.topMargin: -7
@@ -27,8 +27,8 @@ Item {
         Text {
             id: centerCross
             text: "🞥"
-            font.pointSize: 32
-            color: Theme.primaryColor
+            font.pointSize: Theme.fontSizeXL
+            color: Theme.colorPrimary
             anchors.centerIn: parent
             rotation: 45
             transformOrigin: Item.Center
@@ -37,7 +37,7 @@ Item {
         Text {
             text: "⏶"
             font.pointSize: 20
-            color: Qt.darker(Theme.primaryColor, 2)
+            color: Qt.darker(Theme.colorPrimary, 2)
             anchors.horizontalCenter: centerCross.horizontalCenter
             anchors.bottom: centerCross.bottom
             anchors.bottomMargin: -4

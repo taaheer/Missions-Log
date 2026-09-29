@@ -9,7 +9,7 @@ Popup {
     focus: true
 
 
-    property color missionColor: missionType.checked ? Theme.altPrimaryColor : Theme.primaryColor
+    property color missionColor: missionType.checked ? Theme.colorPrimaryAlt : Theme.colorPrimary
 
     property int editIndex: -1
     property bool isEditMode: editIndex >= 0
@@ -156,7 +156,7 @@ Popup {
                 margins: 4
             }
             strokeColor: Theme.transparent
-            fillColor: Theme.secondaryColor
+            fillColor: Theme.colorSecondary
             mirrored: true
         }
     }
@@ -171,7 +171,9 @@ Popup {
         CustomTextField{
             id: missionTitle
             placeholderText: qsTr("Type Mission...")
-            font.pointSize: 14
+            font{
+                pointSize: Theme.fontSizeM
+            }
             color: root.missionColor
             Layout.fillWidth: true
             strokeColor: root.missionColor
@@ -179,9 +181,6 @@ Popup {
 
         RowLayout{
             Layout.fillWidth: true
-            Item {
-                Layout.fillWidth: true
-            }
 
             Button{
                 id: missionType
@@ -194,6 +193,42 @@ Popup {
                     strokeColor: root.missionColor
                     fillColor: root.missionColor
                 }
+
+                font{
+                    pointSize: Theme.fontSizeXS
+                }
+
+                HoverHandler {
+                    cursorShape: Qt.PointingHandCursor
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+
+
+            Button{
+                text: "\u2715"
+                checkable: true
+                checked: false
+                Layout.rightMargin: 8
+                background: HexagonPanel{
+                    mirrored: true
+                    strokeColor: root.missionColor
+                    fillColor: root.missionColor
+                }
+
+                font{
+                    pointSize: Theme.fontSizeXS
+                }
+
+                HoverHandler {
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                onClicked: root.close()
             }
         }
 
@@ -208,6 +243,7 @@ Popup {
                 onClicked: taskStack.decrementCurrentIndex()
                 Layout.fillHeight: true
                 color: root.missionColor
+                visible: !Device.isMobile
             }
 
             SwipeView{
@@ -236,7 +272,7 @@ Popup {
                                 margins: 4
                             }
 
-                            color: Theme.secondaryColor
+                            color: Theme.colorSecondary
 
                             ColumnLayout{
                                 anchors{
@@ -256,7 +292,9 @@ Popup {
                                         color: root.missionColor
                                         font{
                                             bold: true
-                                            pointSize: 14
+                                            pointSize: Theme.fontSizeS
+                                            family: Theme.fontFamilySubTitle
+
                                         }
 
                                         TapHandler  {
@@ -272,16 +310,18 @@ Popup {
                                     }
 
                                     CustomButton{
-                                        anchors.right: parent.right
+                                        anchors{
+                                            right: parent.right
+                                        }
                                         text: qsTr("Delete")
-                                        pointSize: 8
-                                        visible: stagedTaskModel.count > 1
-                                        width: 80
+                                        pointSize: Theme.fontSizeXS
+                                        opacity: stagedTaskModel.count > 1
+                                        enabled: stagedTaskModel.count > 1
+                                        width: 100
                                         height: 20
                                         strokeColor: root.missionColor
                                         fillColor: hovered ? root.missionColor : Theme.transparent
-                                        color: hovered ? Theme.teritiaryTextColor : Theme.primaryTextColor
-
+                                        color: hovered ? Theme.textColorTertiary : Theme.textColorPrimary
                                         onClicked: {
                                             stagedTaskModel.remove(delegateItem.index);
                                         }
@@ -293,9 +333,9 @@ Popup {
                                     id: taskTitle
                                     text: delegateItem.task
                                     placeholderText: qsTr("Title here...")
-                                    font.pointSize: 14
+                                    font.pointSize: Theme.fontSizeS
                                     Layout.fillWidth: true
-                                    color: Theme.primaryTextColor
+                                    color: Theme.textColorPrimary
                                     strokeColor: root.missionColor
 
                                     onTextEdited: root.updateTaskField(delegateItem.index, "task", text)
@@ -305,14 +345,14 @@ Popup {
                                     id: taskDetail
                                     text: delegateItem.detail
                                     placeholderText: qsTr("Detail here...")
-                                    font.pointSize: 12
+                                    font.pointSize: Theme.fontSizeXS
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    color: Theme.primaryTextColor
+                                    color: Theme.textColorPrimary
                                     strokeColor: root.missionColor
                                     wrapMode: Text.Wrap
                                     mirrored: true
-                                    cutLength: 20
+                                    cutLength: Theme.cutM
 
                                     onTextEdited: root.updateTaskField(delegateItem.index, "detail", text)
                                 }
@@ -329,6 +369,7 @@ Popup {
                 onClicked: taskStack.incrementCurrentIndex()
                 Layout.fillHeight: true
                 color: root.missionColor
+                visible: !Device.isMobile
             }
         }
 
@@ -343,6 +384,15 @@ Popup {
                 text: index === taskStack.currentIndex ? "▲" : "△"
                 color: root.missionColor
                 opacity: index === taskStack.currentIndex ? 1.0 : 0.4
+
+                HoverHandler {
+                    cursorShape: Qt.PointingHandCursor
+                }
+                
+                TapHandler {
+                    margin: 10 
+                    onTapped: taskStack.currentIndex = parent.index
+                }
             }
         }
 
@@ -352,7 +402,7 @@ Popup {
             enabled: missionTitle.text.trim() !== "" && stagedTaskModel.count > 0
             fillColor: enabled ? root.missionColor : Qt.darker(root.missionColor, 3)
             strokeColor: root.missionColor
-            color: Theme.secondaryColor
+            color: Theme.colorSecondary
 
             onClicked: {
                 root.startMission();

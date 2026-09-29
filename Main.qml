@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Universal
+import QtQml.Models
 
 import MissionsLog
 
@@ -11,10 +12,19 @@ ApplicationWindow {
     id: window
     width: 1320
     height: 579
-    minimumWidth: 200
+    minimumWidth: 350
     minimumHeight: 250
     visible: true
     title: qsTr("Missions Log")
+
+
+
+    Binding {
+        target: Device
+        property: "isCompactView"
+        value: window.width < 800
+    }
+
 
     // Settings{
     //     id: userSettings
@@ -27,7 +37,7 @@ ApplicationWindow {
     color: "transparent"
 
     background: Rectangle{
-        color: Qt.alpha(Theme.primaryColor, 0.1)
+        color: Qt.alpha(Theme.colorPrimary, 0.1)
     }
     
     WindowAgent{
@@ -37,7 +47,6 @@ ApplicationWindow {
     // qmllint disable unqualified
 
     Component.onCompleted: {
-
         windowAgent.setup(window)
         windowAgent.setTitleBar(titleBar)
 
@@ -65,8 +74,11 @@ ApplicationWindow {
 
         Rectangle {
             id: titleBar
+
+            visible: !Device.isMobile
+
             Layout.fillWidth: true
-            height: 36
+            Layout.preferredHeight: 36
             color: Theme.transparent
 
 
@@ -89,19 +101,21 @@ ApplicationWindow {
                     spacing: -6
                     DecoderText {
                         id: titleText
-                        color: Theme.primaryTextColor
+                        color: Theme.textColorPrimary
                         font{
-                            pointSize: 16
+                            pointSize: Theme.fontSizeM
                             capitalization: Font.AllUppercase
                         }
                         Layout.fillWidth: true
 
                         finalText: window.title
+
+
                     }
 
                     RepeatingCharacter{
                         finalText: "◥".repeat(16)
-                        color: Theme.primaryColor
+                        color: Theme.colorPrimary
                         font.pointSize: 5
                     }
                 }
@@ -153,108 +167,118 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            RowLayout{
+
+
+            ListView{
                 id: main
 
                 anchors{
                     fill: parent
-                    topMargin: 11
-                    bottomMargin: 63
-                    rightMargin: 106
-                    leftMargin: 103
+                    topMargin: parent.height * 0.0349
+                    bottomMargin: parent.height * 0.105
+                    rightMargin: parent.width * 0.071
+                    leftMargin: parent.width * 0.095
                 }
+
+
+                orientation: ListView.Horizontal
+                snapMode: ListView.SnapOneItem
+                interactive: Device.isCompactView
+                clip: false
 
                 spacing: 10
 
-                LeftLayout{
-                    id: leftLayout
-                    mirrored: true
-                    Layout.preferredWidth: main.width / 2 - 52
-                    Layout.fillHeight: true
-                    fillColor: Theme.transparent
-                    strokeColor: Theme.primaryAccent
+                model: ObjectModel{
+                    LeftLayout{
+                        id: leftLayout
+                        mirrored: true
+                        width: Device.isCompactView ? main.width : (main.width / 2) - (main.width * 0.046)
+                        height: main.height
+                        fillColor: Theme.transparent
+                        strokeColor: Theme.accentPrimary
 
-                    opacity: 0
+                        opacity: 0
 
-                    transform: Rotation{
-                        id: leftRotation
-                        axis.x: 0
-                        axis.y: 1
-                        axis.z: 0
+                        transform: Rotation{
+                            id: leftRotation
+                            axis.x: 0
+                            axis.y: 1
+                            axis.z: 0
 
-                        origin.x: leftLayout.width
-                        origin.y: 0
+                            origin.x: leftLayout.width
+                            origin.y: 0
 
-                        angle: 90
-                    }
-
-                    ParallelAnimation{
-                        id: leftAnimation
-                        running: true
-                        NumberAnimation{
-                            target: leftLayout
-                            property: "opacity"
-                            from: 0.0
-                            to: 1.0
-                            duration: 700
-                            easing.type: Easing.OutQuad
+                            angle: 90
                         }
 
-                        NumberAnimation{
-                            target: leftRotation
-                            property: "angle"
-                            from: 90
-                            to: 0
-                            duration: 700
-                            easing.type: Easing.OutCubic
+                        ParallelAnimation{
+                            id: leftAnimation
+                            running: true
+                            NumberAnimation{
+                                target: leftLayout
+                                property: "opacity"
+                                from: 0.0
+                                to: 1.0
+                                duration: 700
+                                easing.type: Easing.OutQuad
+                            }
+
+                            NumberAnimation{
+                                target: leftRotation
+                                property: "angle"
+                                from: 90
+                                to: 0
+                                duration: 700
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
-                }
 
-                RightLayout{
-                    id: rightLayout
-                    fillColor: Theme.transparent
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    cutLength: 26
+                    RightLayout{
+                        id: rightLayout
+                        fillColor: Theme.transparent
+                        width: Device.isCompactView ? main.width : (main.width - leftLayout.width - main.spacing)
+                        height: main.height
+                        cutLength: 26
 
-                    opacity: 0
+                        opacity: 0
 
-                    onEditMissionRequested: {
-                        newMissionPopup.openForEdit(MissionManager.currentIndex, MissionManager.currentMission);
-                    }
-
-                    transform: Rotation{
-                        id: rightRotation
-                        axis.x: 0
-                        axis.y: 1
-                        axis.z: 0
-
-                        origin.x: 0
-                        origin.y: 0
-
-                        angle: 90
-                    }
-
-                    ParallelAnimation{
-                        id: rightAnimation
-                        running: true
-                        NumberAnimation{
-                            target: rightLayout
-                            property: "opacity"
-                            from: 0.0
-                            to: 1.0
-                            duration: 500
-                            easing.type: Easing.OutQuad
+                        onEditMissionRequested: {
+                            newMissionPopup.openForEdit(MissionManager.currentIndex, MissionManager.currentMission);
                         }
 
-                        NumberAnimation{
-                            target: rightRotation
-                            property: "angle"
-                            from: 90
-                            to: 0
-                            duration: 500
-                            easing.type: Easing.OutCubic
+                        transform: Rotation{
+                            id: rightRotation
+                            axis.x: 0
+                            axis.y: 1
+                            axis.z: 0
+
+                            origin.x: 0
+                            origin.y: 0
+
+                            angle: 90
+                        }
+
+                        ParallelAnimation{
+                            id: rightAnimation
+                            running: true
+                            NumberAnimation{
+                                target: rightLayout
+                                property: "opacity"
+                                from: 0.0
+                                to: 1.0
+                                duration: 500
+                                easing.type: Easing.OutQuad
+                            }
+
+                            NumberAnimation{
+                                target: rightRotation
+                                property: "angle"
+                                from: 90
+                                to: 0
+                                duration: 500
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                 }
@@ -265,37 +289,65 @@ ApplicationWindow {
                     top: main.bottom
                     left: main.left
                     right: main.right
-                    leftMargin: 80
-                    topMargin: 10
+                    topMargin: main.height * 0.02
                 }
 
                 spacing: 20
 
                 CustomButton{
                     text: qsTr("Current")
-                    strokeColor: MissionManager.viewStatus === "current" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+                    strokeColor: MissionManager.viewStatus === "current" ? Theme.colorPrimary : Qt.alpha(Theme.colorSecondary, 0.5)
                     onClicked: {
                         MissionManager.viewStatus = "current"
                     }
+                    Layout.fillWidth: true
                 }
 
                 CustomButton{
-                    text: qsTr("Finished Quests")
-                    strokeColor: MissionManager.viewStatus === "finished" ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+                    text: qsTr("Finished")
+                    strokeColor: MissionManager.viewStatus === "finished" ? Theme.colorPrimary : Qt.alpha(Theme.colorSecondary, 0.5)
                     onClicked: {
                         MissionManager.viewStatus = "finished"
                     }
+                    Layout.fillWidth: true
                 }
 
 
                 CustomButton{
                     text: qsTr("New Mission")
-                    strokeColor: hovered ? Theme.primaryColor : Qt.alpha(Theme.secondaryColor, 0.5)
+                    visible: !Device.isCompactView
+                    strokeColor: hovered ? Theme.colorPrimary : Qt.alpha(Theme.colorSecondary, 0.5)
 
                     onClicked: {
                         newMissionPopup.openForAdd();
                     }
+                    Layout.fillWidth: true
                 }
+            }
+
+            Item {
+                anchors.fill: main
+                z: 99
+
+                TapHandler {
+                    id: tap
+
+                    longPressThreshold: 0.4
+
+                    onLongPressed: {
+                        menu.popup(tap.point.position.x - (menu.implicitContentWidth / 2), tap.point.position.y - (menu.height * (Device.isMobile ? 1.6 : 1.2)))
+                    }
+                }
+
+                CustomMenu {
+                    id: menu
+                    strokeColor: Theme.colorPrimary
+                    CustomMenuItem {
+                        text: qsTr("Add Mission")
+                        onTriggered: newMissionPopup.openForAdd()
+                    }
+                }
+
             }
         }
     }
@@ -303,7 +355,7 @@ ApplicationWindow {
     MissionPopup{
         id: newMissionPopup
         anchors.centerIn: parent
-        width: parent.width * 0.7
-        height: parent.height * 0.8
+        width: parent.width * (Device.isMobile ? 1 : 0.7)
+        height: parent.height * (Device.isMobile ? 1 : 0.8)
     }
 }

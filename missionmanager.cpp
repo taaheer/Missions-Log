@@ -458,7 +458,15 @@ void MissionManager::addMission(QVariantMap missionMap)
 
     sourceModel_->addMission(mission);
     saveMissions();
-    emit currentIndexChanged();
+
+    if(currentIndex_ < 0 && filterModel_->rowCount() > 0) 
+    {
+        setCurrentIndex(0);
+    }
+    else
+    {
+        emit currentIndexChanged();
+    }
 }
 
 void MissionManager::editMission(int index, QVariantMap updatedMission)

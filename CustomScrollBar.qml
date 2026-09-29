@@ -10,10 +10,10 @@ ScrollBar {
 
     contentItem: Rectangle {
         visible: control.frontVisible
-        color: Theme.primaryColor
+        color: Theme.colorPrimary
     }
 
     background: Rectangle {
-        color: Qt.darker(Theme.primaryColor, 3.5)
+        color: Qt.darker(Theme.colorPrimary, 3.5)
     }
 }

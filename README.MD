@@ -2,7 +2,7 @@
 
 # Missions Log
 
-<img src="app.svg" align="right" alt="Missions Lo icon" width="1280" height="150">
+<img src="app.svg" alt="Missions Log icon" width="300">
 
 Adam might *“Never asked for this.”*  
 but we did.
@@ -43,7 +43,7 @@ Missions Log was made with:
 
 ## Support
 
-If you like this project and want to support me, please mail me or contact me through the right channel and discuss how you help me and support me.
+If you like this project and want to support me, please mail me <contact@taaheer.com> or contact me through the other channel and discuss how you help me and support me.
 
 ## License
 
